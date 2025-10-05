@@ -7,7 +7,8 @@ import Link from "next/link";
 import { AuthNavigation } from "./components/navigation";
 
 export default function Home() {
-  //Test connessione database
+  /* 
+  // Test connessione database - commentato
   const [testResult, setTestResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,8 +27,11 @@ export default function Home() {
     }
     setLoading(false);
   };
+  */
+  
   return (
     <div>
+      {/* Sezione di test database commentata
       <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       <h1>Test Connessione Database SQL Server</h1>
       
@@ -85,6 +89,7 @@ export default function Home() {
         </div>
       )}
     </div>
+    */}
     <section className="flex flex-col flex-1">
       <div className="flex-1 flex flex-col justify-center items-center">
         <div

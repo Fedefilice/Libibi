@@ -1,21 +1,23 @@
 // Client di collegamento e ricerca dall'API Open Library.
 // Permette di cercare libri tramite parole chiave.
 
-// Tipi TypeScript per le interfacce
-export interface Book {
-  workKey?: string;
+import type { Books, Authors, Book_Authors } from '../generated/prisma';
+
+// Tipi temporanei per i risultati dell'API OpenLibrary prima della conversione
+type OpenLibraryBookResult = {
   title?: string;
   author?: string[];
+  coverUrl?: string;
+  rating?: number;
   authorKey?: string[];
+  workKey?: string;
   firstPublishYear?: string;
   subject?: string[];
-  coverUrl?: string;
   numberOfPagesMedian?: number;
   description?: string;
-  rating?: number;
-}
+};
 
-export interface Author {
+type OpenLibraryAuthorResult = {
   authorKey?: string;
   name?: string;
   personalName?: string;
@@ -38,7 +40,62 @@ export class OpenLibraryService {
 
   constructor() {}
 
-  public async getListBookAsync(searchQuery: string): Promise<Book[]> {
+  public transformToPrismaFormat(books: OpenLibraryBookResult[]): Partial<Books>[] {
+    return books.map(book => {
+      // Create a unique ID for external books
+      const bookID = `ol_${book.workKey || Math.random().toString(36).substring(2, 10)}`;
+      
+      // Transform to match Prisma Books schema
+      const prismaBook: Partial<Books> & { isExternal: boolean; Book_Authors: Partial<Book_Authors>[] } = {
+        bookID: bookID,
+        title: book.title || 'Unknown Title',
+        firstPublicationYear: book.firstPublishYear,
+        pageNumber: book.numberOfPagesMedian,
+        averageRating: book.rating,
+        bookDescription: book.description,
+        coverImageURL: book.coverUrl,
+        subjectsJson: book.subject ? JSON.stringify(book.subject) : null,
+        // Add flag to identify external results (not in schema but useful)
+        isExternal: true,
+        // Include Book_Authors relation
+        Book_Authors: []
+      };
+
+      // Add author relationships if available
+      if (book.author && book.authorKey) {
+        prismaBook.Book_Authors = book.author.map((authorName: string, index: number) => {
+          const authorID = `ol_${book.authorKey?.[index] || 'unknown'}`;
+          
+          return {
+            bookID: bookID,
+            authorID: authorID,
+            Authors: {
+              authorID: authorID,
+              authorName: authorName || 'Unknown Author',
+              birthName: null,
+              birthDate: null,
+              mostFamousWork: null,
+              totalWorks: null,
+              biography: null,
+              imageUrl: null
+            } as Partial<Authors>
+          } as Partial<Book_Authors>;
+        });
+      }
+
+      return prismaBook;
+    });
+  }
+
+  /**
+   * Search and return books in Prisma format
+   */
+  public async searchBooksAsPrismaFormat(searchQuery: string): Promise<Partial<Books>[]> {
+    const books = await this.getListBookAsync(searchQuery);
+    return this.transformToPrismaFormat(books);
+  }
+
+  public async getListBookAsync(searchQuery: string): Promise<OpenLibraryBookResult[]> {
     try {
       // Costruisce URL con parametri di ricerca
       const searchParams = new URLSearchParams({
@@ -74,7 +131,7 @@ export class OpenLibraryService {
         return [];
       }
 
-      const booksList: Book[] = [];
+      const booksList: OpenLibraryBookResult[] = [];
       for (const bookDocument of apiResponse.docs) {
         try {
           const authorNamesList = this.extractAuthorNamesFromDocument(bookDocument);
@@ -100,7 +157,7 @@ export class OpenLibraryService {
     }
   }
 
-  public async getBookAsync(workKey: string): Promise<Book | null> {
+  public async getBookAsync(workKey: string): Promise<OpenLibraryBookResult | null> {
     try {
       // Chiamata API per dettagli libro
       const bookDetailsUrl = OpenLibraryService.BOOK_DETAILS_URL.replace('{0}', workKey);
@@ -147,7 +204,7 @@ export class OpenLibraryService {
     }
   }
 
-  public async getAuthorAsync(authorKey: string): Promise<Author | null> {
+  public async getAuthorAsync(authorKey: string): Promise<OpenLibraryAuthorResult | null> {
     try {
       // Chiamata API per dettagli autore
       const authorDetailsUrl = OpenLibraryService.AUTHOR_DETAILS_URL.replace('{0}', authorKey);
