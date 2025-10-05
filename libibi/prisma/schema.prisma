@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Authors {
+  authorID       String         @id(map: "PK__Authors__8E2731D95B09407D") @db.NVarChar(64)
+  authorName     String         @unique(map: "UQ__Authors__3D70AA694C4922CF") @db.NVarChar(255)
+  birthName      String?        @db.NVarChar(255)
+  birthDate      String?        @db.NVarChar(32)
+  mostFamousWork String?        @db.NVarChar(255)
+  totalWorks     Int?
+  biography      String?        @db.NVarChar(Max)
+  imageUrl       String?        @db.NVarChar(512)
+  Book_Authors   Book_Authors[]
+}
+
+model Book_Authors {
+  bookID   String  @db.NVarChar(64)
+  authorID String  @db.NVarChar(64)
+  Authors  Authors @relation(fields: [authorID], references: [authorID], onUpdate: NoAction, map: "FK_BookAuthors_Authors")
+  Books    Books   @relation(fields: [bookID], references: [bookID], onUpdate: NoAction, map: "FK_BookAuthors_Books")
+
+  @@id([bookID, authorID], map: "PK__Book_Aut__0307D2302CDB5992")
+}
+
+model Books {
+  bookID               String            @id(map: "PK__Books__8BE5A12D9B8F29C4") @db.NVarChar(64)
+  title                String            @db.NVarChar(255)
+  firstPublicationYear String?           @db.NVarChar(16)
+  imageId              Int?
+  pageNumber           Int?
+  averageRating        Float?
+  bookDescription      String?           @db.NVarChar(Max)
+  subjectsJson         String?           @db.NVarChar(Max)
+  coverImageURL        String?           @db.NVarChar(500)
+  Book_Authors         Book_Authors[]
+  Recommendations      Recommendations[]
+  Reviews              Reviews[]
+  User_Shelves         User_Shelves[]
+}
+
+model Recommendations {
+  recommendationID     String    @id(map: "PK__Recommen__9FDE9834760AB896") @default(dbgenerated("newid()"), map: "DF__Recommend__recom__45F365D3") @db.UniqueIdentifier
+  userID               Int
+  recommendedBookID    String    @db.NVarChar(64)
+  recommendationSource String?   @db.NVarChar(100)
+  generatedDate        DateTime? @db.DateTime
+  score                Float?
+  Books                Books     @relation(fields: [recommendedBookID], references: [bookID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Recommendations_Books")
+  Users                Users     @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Recommendations_Users")
+
+  @@index([userID], map: "IDX_Recommendations_UserID")
+}
+
+model Reviews {
+  reviewID       String    @id(map: "PK__Reviews__2ECD6E24E18E9AB6") @default(dbgenerated("newid()"), map: "DF__Reviews__reviewI__4AB81AF0") @db.UniqueIdentifier
+  bookID         String    @db.NVarChar(64)
+  userID         Int
+  parentReviewID String?   @db.UniqueIdentifier
+  rating         Int
+  reviewTitle    String?   @db.NVarChar(255)
+  reviewText     String?   @db.NText
+  reviewDate     DateTime? @default(now(), map: "DF__Reviews__reviewD__4CA06362") @db.DateTime
+  is_deleted     Boolean   @default(false, map: "DF__Reviews__is_dele__4D94879B")
+  Books          Books     @relation(fields: [bookID], references: [bookID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Reviews_Books")
+  Reviews        Reviews?  @relation("ReviewsToReviews", fields: [parentReviewID], references: [reviewID], onDelete: NoAction, onUpdate: NoAction, map: "FK_Reviews_ParentReview")
+  other_Reviews  Reviews[] @relation("ReviewsToReviews")
+  Users          Users     @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: NoAction, map: "FK_Reviews_Users")
+
+  @@index([bookID, reviewDate(sort: Desc)], map: "IDX_Reviews_BookID_ReviewDate")
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B618E5F15BE") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+model User_Shelves {
+  userID                Int
+  bookID                String    @db.NVarChar(64)
+  status                String    @db.NVarChar(20)
+  started_reading_date  DateTime? @db.Date
+  finished_reading_date DateTime? @db.Date
+  last_updated          DateTime? @default(now(), map: "DF__User_Shel__last___5441852A") @db.DateTime
+  Books                 Books     @relation(fields: [bookID], references: [bookID], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserReadingStatus_Books")
+  Users                 Users     @relation(fields: [userID], references: [userID], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserReadingStatus_Users")
+
+  @@id([userID, bookID], map: "PK__User_She__032446CDF567E421")
+  @@index([userID, status], map: "IDX_UserReadingStatus_UserID_Status")
+}
+
+model Users {
+  userID          Int               @id(map: "PK__Users__CB9A1CDF0CE76CDB") @default(autoincrement())
+  nome            String            @db.NVarChar(50)
+  cognome         String            @db.NVarChar(50)
+  username        String            @unique(map: "UQ__Users__F3DBC572C44C7E30") @db.NVarChar(100)
+  email           String            @unique(map: "UQ__Users__AB6E6164754D19D0") @db.NVarChar(255)
+  passwd          String            @db.NVarChar(255)
+  created_at      DateTime?         @default(now(), map: "DF__Users__created_a__4222D4EF") @db.DateTime
+  Admin           Boolean           @default(false, map: "DF__Users__Admin__4316F928")
+  Recommendations Recommendations[]
+  Reviews         Reviews[]
+  User_Shelves    User_Shelves[]
+}
