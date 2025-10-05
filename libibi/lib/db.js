@@ -23,16 +23,16 @@ export async function connectToDatabase() {
   }
 
   try {
-    console.log('🔗 Connessione a SQL Server...');
-    console.log('📍 Server:', config.server);
-    console.log('📍 Instance:', config.options.instanceName);
-    console.log('📂 Database:', config.database);
-    console.log('👤 User:', config.user);
+    console.log('Connessione a SQL Server...');
+    console.log('Server:', config.server);
+    console.log('Instance:', config.options.instanceName);
+    console.log('Database:', config.database);
+    console.log('User:', config.user);
     pool = await sql.connect(config);
-    console.log('✅ Connesso a SQL Server!');
+    console.log('Connesso a SQL Server!');
     return pool;
   } catch (err) {
-    console.error('❌ Errore connessione:', err.message);
+    console.error('Errore connessione:', err.message);
     throw err;
   }
 }

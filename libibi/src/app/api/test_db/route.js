@@ -4,7 +4,7 @@ import { connectToDatabase, sql } from '../../../../lib/db';
 
 export async function GET() {
   try {
-    console.log('🎯 Test con stringa collaudata...');
+    console.log('Test con stringa collaudata...');
     
     const pool = await connectToDatabase();
     const result = await sql.query`
@@ -27,10 +27,10 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('❌ ERRORE:', error.message);
+    console.error('ERRORE:', error.message);
     return NextResponse.json({
       success: false,
-      message: 'Errore con stringa collaudata - strano!',
+      message: 'Errore con stringa collaudata!',
       error: error.message
     }, { status: 500 });
   }

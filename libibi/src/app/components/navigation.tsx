@@ -3,17 +3,17 @@ import Link from "next/link";
 export const Navigation = () => (
   <ul className="flex space-x-10">
     <li>
-      <Link href="/" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
+      <Link href="/search" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
         CERCA
       </Link>
     </li>
     <li>
-      <Link href="#" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
+      <Link href="/recommended" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
         CONSIGLIATI
       </Link>
     </li>
     <li>
-      <Link href="#" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
+      <Link href="/profile" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
         PROFILO
       </Link>
     </li>
