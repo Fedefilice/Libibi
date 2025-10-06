@@ -26,18 +26,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-[var(--color-background)]`}
       >
-        <nav className="flex items-center justify-between px-8 py-6 bg-[#17332a]">
+        <nav className="flex items-center justify-between px-8 py-6 bg-[var(--color-foreground)]">
           <HeaderNavigation />
           <div className="flex items-center space-x-6">
             <Navigation />
-            <AuthNavigation />
           </div>
         </nav>
-        <main className="flex-1">{children}</main>
-        <footer className="px-8 py-6 bg-[#17332a] flex justify-center items-center">
-          <p className="text-base text-center" style={{ color: "#a86c3c" }}>
+        <main className="flex-1 bg-[var(--color-background)]">{children}</main>
+        <footer className="px-8 py-6 bg-[var(--color-foreground)] flex justify-center items-center">
+          <p className="text-base text-center text-[var(--color-accent)]">
             © 2023 Libibi. All rights reserved.
           </p>
         </footer>

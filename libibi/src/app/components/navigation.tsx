@@ -3,17 +3,17 @@ import Link from "next/link";
 export const Navigation = () => (
   <ul className="flex space-x-10">
     <li>
-      <Link href="/search" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
+      <Link href="/search" className="text-[var(--color-background)] text-lg font-serif hover:text-[var(--color-accent)] hover:underline transition-colors">
         CERCA
       </Link>
     </li>
     <li>
-      <Link href="/recommended" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
+      <Link href="/recommended" className="text-[var(--color-background)] text-lg font-serif hover:text-[var(--color-accent)] hover:underline transition-colors">
         CONSIGLIATI
       </Link>
     </li>
     <li>
-      <Link href="/profile" className="text-[#eae0ce] text-lg font-serif hover:text-[#a86c3c] hover:underline transition-colors">
+      <Link href="/profile" className="text-[var(--color-background)] text-lg font-serif hover:text-[var(--color-accent)] hover:underline transition-colors">
         PROFILO
       </Link>
     </li>
@@ -23,8 +23,8 @@ export const Navigation = () => (
 export const HeaderNavigation = () => (
   <div className="flex items-center space-x-2">
     <Link href="/" className="flex items-center space-x-2">
-      <span className="text-3xl font-serif text-[#eae0ce] tracking-wide cursor-pointer">Libibi</span>
-      <span className="w-2 h-2 rounded-full bg-[#a86c3c] inline-block self-center"></span>
+      <span className="text-3xl font-serif text-[var(--color-background)] tracking-wide cursor-pointer">Libibi</span>
+      <span className="w-2 h-2 rounded-full bg-[var(--color-accent)] inline-block self-center"></span>
     </Link>
   </div>
 );
@@ -44,4 +44,4 @@ export const AuthNavigation = () => (
       Inizia il tuo viaggio
     </button>
   </Link>
-); 
+);

@@ -25,54 +25,73 @@ export default function LoginPage() {
         return;
       }
       const data = await res.json();
-      // Save user info to localStorage so profile page can read it
+      // Save user info to localStorage and set authentication cookie
       try {
         if (typeof window !== 'undefined') {
           localStorage.setItem('libibi_user', JSON.stringify(data));
+          
+          // Importiamo e usiamo la funzione per impostare il cookie
+          import("../../hooks/useAuth").then(({ setLoginCookie }) => {
+            setLoginCookie("authenticated", 7); // Cookie valido per 7 giorni
+          });
         }
       } catch (e) {
         // ignore storage errors
       }
-      // On success, redirect to profile or home
-      router.push("/profile");
+      // On success, redirect to home
+      router.push("/");
     } catch (err: any) {
       setError(err?.message || "Errore di rete");
     }
   }
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-8 bg-white rounded shadow">
-      <h1 className="text-2xl mb-4">Accedi</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm">Username</label>
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            required
-          />
-        </div>
-        {error && <div className="text-red-600">{error}</div>}
-        <div className="flex items-center justify-between">
-          <button className="px-4 py-2 bg-[#a86c3c] text-white rounded" type="submit">
-            Accedi
-          </button>
-          <a href="/register" className="text-sm text-[#17332a] hover:underline">
-            Registrati
-          </a>
-        </div>
-      </form>
+    <div className="container mx-auto px-8 py-12">
+      <h1 className="text-4xl text-center font-serif mb-8 text-[var(--color-foreground)]">
+        Accedi
+      </h1>
+      
+      <div className="max-w-md mx-auto card">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Username</label>
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="form-input"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="form-input"
+              required
+            />
+          </div>
+          
+          {error && (
+            <div className="text-center p-4 bg-red-50 border border-red-200 rounded-full">
+              <p className="text-red-600">{error}</p>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between pt-2">
+            <button 
+              className="btn btn-accent disabled:opacity-50" 
+              type="submit"
+            >
+              Accedi
+            </button>
+            <a href="/register" className="text-[var(--color-accent)] hover:underline">
+              Registrati
+            </a>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

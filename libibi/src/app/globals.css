@@ -1,10 +1,46 @@
 @import "tailwindcss";
 
 :root {
-  --color-background: #eae0ce;
+  --color-background: #f0ebe2;
   --color-foreground: #17332a;
   --color-accent: #a86c3c;
   --color-card: #ffffff;
-  --color-card-shadow: rgba(23, 51, 42, 0.08);
+  --color-card-shadow: rgba(23, 51, 42, 0.12);
   --font-sans: var(--font-serif), serif;
+}
+
+/* Applicazione esplicita del colore di background */
+html, body {
+  background-color: var(--color-background);
+}
+
+body {
+  min-height: 100vh;
+}
+
+@layer components {
+  /* Pulsanti base */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-2 rounded-full font-medium shadow transition-all duration-150;
+  }
+
+  /* Pulsante accent (CTA) */
+  .btn-accent {
+    @apply bg-[var(--color-accent)] text-[var(--color-card)] hover:bg-[var(--color-foreground)];
+  }
+
+  /* Pulsante ghost (bordo) */
+  .btn-ghost {
+    @apply bg-transparent border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-white;
+  }
+
+  /* Campo input */
+  .form-input {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)];
+  }
+
+  /* Card */
+  .card {
+    @apply bg-[var(--color-card)] shadow-md rounded-2xl border border-gray-100 p-6;
+  }
 }

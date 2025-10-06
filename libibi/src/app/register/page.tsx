@@ -37,36 +37,52 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-8 bg-white rounded shadow">
-      <h1 className="text-2xl mb-4">Registrati</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm">Nome</label>
-          <input value={nome} onChange={(e) => setNome(e.target.value)} className="w-full border px-3 py-2 rounded" required />
-        </div>
-        <div>
-          <label className="block text-sm">Cognome</label>
-          <input value={cognome} onChange={(e) => setCognome(e.target.value)} className="w-full border px-3 py-2 rounded" required />
-        </div>
-        <div>
-          <label className="block text-sm">Username</label>
-          <input value={username} onChange={(e) => setUsername(e.target.value)} className="w-full border px-3 py-2 rounded" required />
-        </div>
-        <div>
-          <label className="block text-sm">Email</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border px-3 py-2 rounded" required />
-        </div>
-        <div>
-          <label className="block text-sm">Password</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border px-3 py-2 rounded" required />
-        </div>
-        {error && <div className="text-red-600">{error}</div>}
-        {success && <div className="text-green-600">{success}</div>}
-        <div className="flex items-center justify-between">
-          <button className="px-4 py-2 bg-[#a86c3c] text-white rounded" type="submit">Registrati</button>
-          <a href="/login" className="text-sm text-[#17332a] hover:underline">Hai già un account?</a>
-        </div>
-      </form>
+    <div className="container mx-auto px-8 py-12">
+      <h1 className="text-4xl text-center font-serif mb-8 text-[var(--color-foreground)]">
+        Registrati
+      </h1>
+      
+      <div className="max-w-md mx-auto card">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Nome</label>
+            <input value={nome} onChange={(e) => setNome(e.target.value)} className="form-input" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Cognome</label>
+            <input value={cognome} onChange={(e) => setCognome(e.target.value)} className="form-input" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Username</label>
+            <input value={username} onChange={(e) => setUsername(e.target.value)} className="form-input" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="form-input" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-foreground)] mb-2">Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="form-input" required />
+          </div>
+          
+          {error && (
+            <div className="text-center p-4 bg-red-50 border border-red-200 rounded-full">
+              <p className="text-red-600">{error}</p>
+            </div>
+          )}
+          
+          {success && (
+            <div className="text-center p-4 bg-green-50 border border-green-200 rounded-full">
+              <p className="text-green-600">{success}</p>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between pt-2">
+            <button className="btn btn-accent" type="submit">Registrati</button>
+            <a href="/login" className="text-[var(--color-accent)] hover:underline">Hai già un account?</a>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
