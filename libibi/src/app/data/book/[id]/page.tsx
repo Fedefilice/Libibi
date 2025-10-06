@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useBookDetails, BookDetail } from '../../../hooks/useBookDetails';
-import BookCard from '../../../components/ui/BookCard';
+import { useBookDetails, BookDetail } from '../../../../hooks/useBookDetails';
+import BookCard from '../../../../components/ui/BookCard';
 
 // Componente per la sezione dei dettagli del libro
 const BookDetailSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -70,7 +70,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
         bookID: book.WorkKey,
         status
       };
-      
+
 
       setAdding(true);
       const res = await fetch('/api/users/shelves', {
@@ -91,8 +91,8 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
         return;
       }
 
-      // Successo: mostra un messaggio inline 
-  const italianStatus = statusLabelMap[normalizeStatusKey(status)] || statusLabelMap[status] || status;
+      // Successo: mostra un messaggio inline
+      const italianStatus = statusLabelMap[normalizeStatusKey(status)] || statusLabelMap[status] || status;
       setBookPresent(true);
       setServerStatus(normalizeStatusKey(status));
       setFlash({ type: 'success', text: `"${book.Title}" è stato aggiunto alla tua libreria. Stato: ${italianStatus}` });
@@ -108,7 +108,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
     try {
       const credsJson = typeof window !== 'undefined' ? localStorage.getItem('libibi_credentials') : null;
       if (!credsJson) {
-        setFlash({ type: 'error', text: 'Devi essere loggato per rimuovere un libro dalla tua libreria.' });
+        setFlash({ type: 'error', text: 'Devi essere loggato per rimuovere un libro dalla tua libreria.' });       
         setTimeout(() => setFlash(null), 4000);
         return;
       }
@@ -141,7 +141,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
   useEffect(() => {
     async function loadShelf() {
       try {
-        const credsJson = typeof window !== 'undefined' ? localStorage.getItem('libibi_credentials') : null;
+        const credsJson = typeof window !== 'undefined' ? localStorage.getItem('libibi_credentials') : null;       
         if (!credsJson) return;
         const creds = JSON.parse(credsJson);
         const auth = btoa(`${creds.username}:${creds.password}`);
@@ -170,7 +170,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
       <div className="container mx-auto px-8 py-12 flex justify-center items-center min-h-[500px]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-accent)] border-t-transparent mb-4"></div>
-          <p className="text-lg text-[var(--color-foreground)]">Caricamento dettagli libro...</p>
+          <p className="text-lg text-[var(--color-foreground]">Caricamento dettagli libro...</p>
         </div>
       </div>
     );
@@ -182,10 +182,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
         <div className="max-w-3xl mx-auto bg-red-50 p-6 rounded-lg border border-red-200">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Errore</h2>
           <p className="text-gray-700">{error}</p>
-          <Link 
-            href="/search" 
-            className="inline-block mt-6 px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-foreground)] transition-colors"
-          >
+          <Link href="/data/search" className="inline-block mt-6 px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-foreground)] transition-colors">
             Torna alla ricerca
           </Link>
         </div>
@@ -199,10 +196,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
         <div className="max-w-3xl mx-auto bg-yellow-50 p-6 rounded-lg border border-yellow-200">
           <h2 className="text-2xl font-bold text-yellow-600 mb-4">Libro non trovato</h2>
           <p className="text-gray-700">Non è stato possibile trovare il libro richiesto.</p>
-          <Link 
-            href="/search" 
-            className="inline-block mt-6 px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-foreground)] transition-colors"
-          >
+          <Link href="/data/search" className="inline-block mt-6 px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-foreground)] transition-colors">
             Torna alla ricerca
           </Link>
         </div>
@@ -223,7 +217,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
             </li>
             <li>/</li>
             <li>
-              <Link href="/search" className="hover:text-[var(--color-accent)]">
+              <Link href="/data/search" className="hover:text-[var(--color-accent)]">
                 Ricerca
               </Link>
             </li>
@@ -239,7 +233,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
           {/* BookCard per la copertina e le informazioni di base */}
           <div className="md:col-span-1">
             <div className="flex justify-center">
-              <BookCard 
+              <BookCard
                 book={{
                   Title: book.Title,
                   AuthorName: book.Author,
@@ -257,7 +251,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
           {/* Dettagli libro */}
           <div className="md:col-span-2">
             <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-4">Dettagli</h1>
-            
+
             <div className="grid grid-cols-2 gap-4 mb-6">
               {book.FirstPublishYear && (
                 <div>
@@ -265,14 +259,14 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
                   <p className="text-lg">{book.FirstPublishYear}</p>
                 </div>
               )}
-              
+
               {book.NumberOfPagesMedian && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Numero di pagine</h3>
                   <p className="text-lg">{book.NumberOfPagesMedian}</p>
                 </div>
               )}
-              
+
               {book.Rating && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Valutazione</h3>
@@ -284,7 +278,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
             {/* Descrizione */}
             <BookDetailSection label="Descrizione">
               {book.Description ? (
-                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: book.Description }} />
+                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: book.Description }} />        
               ) : (
                 <p className="italic text-gray-500">Nessuna descrizione disponibile per questo libro.</p>
               )}
@@ -302,11 +296,6 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
                       {subject}
                     </span>
                   ))}
-                  {book.Subject.length > 5 && (
-                    <span className="text-gray-500 text-sm ml-1 self-center">
-                      +{book.Subject.length - 5} altri
-                    </span>
-                  )}
                 </div>
               </BookDetailSection>
             )}

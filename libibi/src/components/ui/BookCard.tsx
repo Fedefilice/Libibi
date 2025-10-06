@@ -19,6 +19,8 @@ export type BookCardProps = {
 
 const BookCard: React.FC<BookCardProps> = ({
   book,
+  onAddToLibrary,
+  showAddButton = true,
   className = '',
 }) => {
   return (
@@ -27,8 +29,8 @@ const BookCard: React.FC<BookCardProps> = ({
         <div className="bg-gray-100 w-full">
           <Link href={`/book/${encodeURIComponent(book.WorkKey)}`}>
             <div className="w-full h-[276px] relative flex justify-center items-center">
-              <Image 
-                src={book.CoverUrl || "/book-image.jpg"} 
+              <Image
+                src={book.CoverUrl || "/book-image.jpg"}
                 alt={`Copertina di ${book.Title}`}
                 fill
                 sizes="253px"
@@ -43,27 +45,21 @@ const BookCard: React.FC<BookCardProps> = ({
             </div>
           </Link>
         </div>
-        
+
         <div className="p-6 bg-[var(--color-card)] flex flex-col flex-1">
-          <Link 
-            href={`/book/${encodeURIComponent(book.WorkKey)}`}
-            className="block text-center"
-          >
+          <Link href={`/book/${encodeURIComponent(book.WorkKey)}`} className="block text-center">
             <h3 className="text-xl font-bold text-[var(--color-black)] mb-2 hover:underline line-clamp-2 h-[60px] flex items-center justify-center" title={book.Title}>
               {book.Title}
             </h3>
           </Link>
-          
+
           <p className="text-sm text-[var(--color-accent)] mb-4 line-clamp-1 text-center">
-            {book.AuthorName && book.AuthorName.length > 0 
+            {book.AuthorName && book.AuthorName.length > 0
               ? book.AuthorName.map((authorName, index) => (
                   <span key={index}>
                     {index > 0 && ", "}
                     {book.AuthorKey && book.AuthorKey[index] ? (
-                      <Link 
-                        href={`/author/${encodeURIComponent(book.AuthorKey[index])}`} 
-                        className="hover:underline"
-                      >
+                      <Link href={`/author/${encodeURIComponent(book.AuthorKey[index])}`} className="hover:underline">
                         {authorName}
                       </Link>
                     ) : (
@@ -78,4 +74,5 @@ const BookCard: React.FC<BookCardProps> = ({
     </div>
   );
 };
+
 export default BookCard;

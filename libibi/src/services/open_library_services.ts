@@ -2,31 +2,7 @@
 // Permette di cercare libri tramite parole chiave.
 
 import type { Books, Authors, Book_Authors } from '../generated/prisma';
-
-// Tipi temporanei per i risultati dell'API OpenLibrary prima della conversione
-type OpenLibraryBookResult = {
-  title?: string;
-  author?: string[];
-  coverUrl?: string;
-  rating?: number;
-  authorKey?: string[];
-  workKey?: string;
-  firstPublishYear?: string;
-  subject?: string[];
-  numberOfPagesMedian?: number;
-  description?: string;
-};
-
-type OpenLibraryAuthorResult = {
-  authorKey?: string;
-  name?: string;
-  personalName?: string;
-  birthDate?: string;
-  topWork?: string;
-  workCount?: number;
-  bio?: string;
-  imageUrl?: string;
-}
+import { OpenLibraryBookResult, OpenLibraryAuthorResult } from './open_library_types';
 
 export class OpenLibraryService {
   // URL endpoint dell'API Open Library
@@ -35,8 +11,8 @@ export class OpenLibraryService {
   private static readonly AUTHOR_DETAILS_URL = "https://openlibrary.org/authors/{0}.json";
 
   // Configurazione timeout e limite risultati
-  private static readonly HTTP_TIMEOUT_SECONDS = 10000; // in millisecondi per fetch
-  private static readonly MAX_SEARCH_RESULTS = 20;
+  private static readonly HTTP_TIMEOUT_SECONDS = 5000; // Timeout ridotto a 5 secondi
+  private static readonly MAX_SEARCH_RESULTS = 15; // Ridotto per migliorare prestazioni
 
   constructor() {}
 
@@ -105,7 +81,9 @@ export class OpenLibraryService {
       });
 
       const apiUrl = `${OpenLibraryService.SEARCH_API_URL}?${searchParams.toString()}`;
-
+      
+      console.log(`Ricerca API per "${searchQuery}"`);
+      
       // Chiamata API con timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), OpenLibraryService.HTTP_TIMEOUT_SECONDS);
@@ -116,7 +94,8 @@ export class OpenLibraryService {
           'User-Agent': 'Libibi (federico.filice@studenti.unipr.it)',
           'Content-Type': 'application/json'
         },
-        signal: controller.signal
+        signal: controller.signal,
+        next: { revalidate: 3600 } // Cache per 1 ora
       });
 
       clearTimeout(timeoutId);
@@ -162,6 +141,8 @@ export class OpenLibraryService {
       // Chiamata API per dettagli libro
       const bookDetailsUrl = OpenLibraryService.BOOK_DETAILS_URL.replace('{0}', workKey);
       
+      console.log(`Caricamento dettagli libro "${workKey}"`);
+      
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), OpenLibraryService.HTTP_TIMEOUT_SECONDS);
 
@@ -171,7 +152,8 @@ export class OpenLibraryService {
           'User-Agent': 'Libibi (federico.filice@studenti.unipr.it)',
           'Content-Type': 'application/json'
         },
-        signal: controller.signal
+        signal: controller.signal,
+        next: { revalidate: 86400 } // Cache per 24 ore
       });
 
       clearTimeout(timeoutId);
@@ -187,7 +169,7 @@ export class OpenLibraryService {
       const authorNamesList = await this.getAuthorNamesFromKeys(authorKeysList);
       const bookCoverUrl = this.extractCoverImageFromBookDetails(bookData);
 
-      return {
+      const bookResult = {
         workKey: this.getCleanWorkKeyFromBookDetails(bookData),
         title: this.getStringProperty(bookData, "title"),
         author: authorNamesList,
@@ -198,6 +180,8 @@ export class OpenLibraryService {
         numberOfPagesMedian: this.getIntegerProperty(bookData, "number_of_pages_median"),
         description: bookDescription
       };
+      
+      return bookResult;
     } catch (ex) {
       console.error(`Errore recupero libro '${workKey}': ${ex}`);
       return null;
@@ -209,6 +193,8 @@ export class OpenLibraryService {
       // Chiamata API per dettagli autore
       const authorDetailsUrl = OpenLibraryService.AUTHOR_DETAILS_URL.replace('{0}', authorKey);
       
+      console.log(`Caricamento dettagli autore "${authorKey}"`);
+      
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), OpenLibraryService.HTTP_TIMEOUT_SECONDS);
 
@@ -218,7 +204,8 @@ export class OpenLibraryService {
           'User-Agent': 'Libibi (federico.filice@studenti.unipr.it)',
           'Content-Type': 'application/json'
         },
-        signal: controller.signal
+        signal: controller.signal,
+        next: { revalidate: 86400 } // Cache per 24 ore
       });
 
       clearTimeout(timeoutId);
@@ -232,7 +219,7 @@ export class OpenLibraryService {
       const authorBiography = this.extractAuthorBiography(authorData);
       const authorImageUrl = this.extractAuthorImageUrl(authorData);
 
-      return {
+      const authorResult = {
         authorKey: this.getRequiredStringProperty(authorData, "key")?.replace("/authors/", ""),
         name: this.getRequiredStringProperty(authorData, "name"),
         personalName: this.getStringProperty(authorData, "personal_name"),
@@ -242,6 +229,8 @@ export class OpenLibraryService {
         bio: authorBiography,
         imageUrl: authorImageUrl
       };
+      
+      return authorResult;
     } catch (ex) {
       console.error(`Errore recupero autore '${authorKey}': ${ex}`);
       return null;
@@ -255,12 +244,17 @@ export class OpenLibraryService {
         return [];
       }
 
+      // Ottimizzato: batch di richieste di autori
       const authorNamePromises = authorKeys.map(async (authorKey) => {
         const authorDetails = await this.getAuthorAsync(authorKey);
         return authorDetails?.name || "Autore sconosciuto";
       });
-
-      return await Promise.all(authorNamePromises);
+      
+      // Non aspetta tutte le richieste se alcune falliscono
+      const names = await Promise.allSettled(authorNamePromises);
+      return names
+        .filter(result => result.status === 'fulfilled')
+        .map(result => (result as PromiseFulfilledResult<string>).value);
     } catch (ex) {
       console.error(`Errore recupero nomi autori: ${ex}`);
       return [];
