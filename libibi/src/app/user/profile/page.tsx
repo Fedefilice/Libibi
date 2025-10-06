@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clearLoginCookie } from '@/hooks/useAuth';
+import UserReviewsList from '@/components/ui/UserReviewsList';
 
 // Pagina del profilo utente
 
@@ -14,7 +15,7 @@ type User = {
   Admin?: boolean;
 };
 
-type MenuTab = 'voglio-leggere' | 'sto-leggendo' | 'letto' | 'abbandonato' | 'impostazioni';
+type MenuTab = 'voglio-leggere' | 'sto-leggendo' | 'letto' | 'abbandonato' | 'impostazioni' | 'recensioni';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -222,6 +223,15 @@ export default function ProfilePage() {
             )}
           </>
         );
+      case 'recensioni':
+        return (
+          <>
+            <h1 className="text-3xl font-serif border-b border-[var(--color-accent)] pb-2 mb-8 text-[var(--color-foreground)]">
+              Le mie recensioni
+            </h1>
+            <UserReviewsList />
+          </>
+        );
       case 'impostazioni':
       default:
         return (
@@ -337,6 +347,15 @@ export default function ProfilePage() {
                       ${activeTab === 'abbandonato' ? 'bg-[var(--color-background)]' : 'hover:bg-[var(--color-background)] hover:bg-opacity-50'}`}
                   >
                     Abbandonato
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => setActiveTab('recensioni')}
+                    className={`w-full text-left py-3 px-4 rounded-full text-[var(--color-foreground)] transition-colors
+                      ${activeTab === 'recensioni' ? 'bg-[var(--color-background)]' : 'hover:bg-[var(--color-background)] hover:bg-opacity-50'}`}
+                  >
+                    Le mie recensioni
                   </button>
                 </li>
                 <li>

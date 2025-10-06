@@ -4,6 +4,7 @@ import Image from "next/image";
 import bookIndex from "./book_index.jpg";
 import { AuthNavigation } from "./components/navigation";
 import { useIsLoggedIn } from "../hooks/useAuth";
+import ReviewsList from '../components/ui/ReviewsList';
 
 export default function Home() {
   const isLoggedIn = useIsLoggedIn();  
@@ -50,6 +51,17 @@ export default function Home() {
               </p>
               {!isLoggedIn && <AuthNavigation />}
             </div>
+          </div>
+        </div>
+      </section>
+      <section className="container mx-auto px-8 pb-12">
+        <div className="max-w-6xl mx-auto mt-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">Recensioni recenti</h2>
+            <a href="/reviews" className="text-sm text-[var(--color-accent)] hover:underline">Vedi tutte</a>
+          </div>
+          <div className="flex flex-col gap-4">
+            <ReviewsList limit={3} />
           </div>
         </div>
       </section>

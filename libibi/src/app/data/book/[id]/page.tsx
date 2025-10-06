@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useBookDetails, BookDetail } from '../../../../hooks/useBookDetails';
 import BookCard from '../../../../components/ui/BookCard';
+import CreateReview from '../../../../components/ui/CreateReview';
+import ReviewsList from '../../../../components/ui/ReviewsList';
 
 // Pagina di dettaglio del libro
 const BookDetailSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -25,6 +27,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
   const [needLoginPrompt, setNeedLoginPrompt] = useState(false);
   const [bookPresent, setBookPresent] = useState(false);
   const [serverStatus, setServerStatus] = useState<string | null>(null);
+  const [reviewsRefreshKey, setReviewsRefreshKey] = useState(0);
 
   const statusLabelMap: Record<string, string> = {
     WantToRead: 'Voglio leggerlo',
@@ -377,6 +380,22 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
                   {flash.text}
                 </div>
               )}
+            </div>
+             <div className="mt-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    {/* Form recensione smooth */}
+                    <details className="create-review-collapse rounded p-3">
+                      <summary className="cursor-pointer font-medium text-[var(--color-accent)]">Lo hai letto? Recensiscilo</summary>
+                      <div className="mt-3">
+                        <CreateReview bookID={book.WorkKey} onSuccess={() => setReviewsRefreshKey(k => k + 1)} />
+                      </div>
+                    </details>
+                  </div>
+                  <div>
+                    <ReviewsList bookID={book.WorkKey} limit={8} key={reviewsRefreshKey} />
+                  </div>
+                </div>
             </div>
           </div>
         </div>
