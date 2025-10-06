@@ -25,15 +25,18 @@ export default function LoginPage() {
         return;
       }
       const data = await res.json();
-      // Save user info to localStorage so profile page can read it
+      // Salva i dati utente e le credenziali in localStorage
       try {
         if (typeof window !== 'undefined') {
           localStorage.setItem('libibi_user', JSON.stringify(data));
+          // Memorizza le credenziali in modo che il client possa chiamare le API protette da Basic-Auth.
+          // NOTA: memorizzare la password in chiaro in localStorage non è sicuro per la produzione.(Nel caso ci fosse tale domanda)
+          localStorage.setItem('libibi_credentials', JSON.stringify({ username, password }));
         }
       } catch (e) {
-        // ignore storage errors
+        console.error('Errore salvando i dati utente', e);
       }
-      // On success, redirect to profile or home
+      // Successo, reindirizza al profilo
       router.push("/profile");
     } catch (err: any) {
       setError(err?.message || "Errore di rete");

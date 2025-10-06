@@ -19,8 +19,6 @@ export type BookCardProps = {
 
 const BookCard: React.FC<BookCardProps> = ({
   book,
-  onAddToLibrary,
-  showAddButton = true,
   className = '',
 }) => {
   return (
