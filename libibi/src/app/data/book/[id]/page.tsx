@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useBookDetails, BookDetail } from '../../../hooks/useBookDetails';
-import BookCard from '../../../components/ui/BookCard';
+import { useBookDetails, BookDetail } from '../../../../hooks/useBookDetails';
+import BookCard from '../../../../components/ui/BookCard';
 
 // Componente per la sezione dei dettagli del libro
 const BookDetailSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -38,7 +38,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
           <h2 className="text-2xl font-bold text-red-600 mb-4">Errore</h2>
           <p className="text-gray-700">{error}</p>
           <Link 
-            href="/search" 
+            href="/data/search" 
             className="inline-block mt-6 px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-foreground)] transition-colors"
           >
             Torna alla ricerca
@@ -55,7 +55,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
           <h2 className="text-2xl font-bold text-yellow-600 mb-4">Libro non trovato</h2>
           <p className="text-gray-700">Non è stato possibile trovare il libro richiesto.</p>
           <Link 
-            href="/search" 
+            href="/data/search" 
             className="inline-block mt-6 px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-foreground)] transition-colors"
           >
             Torna alla ricerca
@@ -78,7 +78,7 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
             </li>
             <li>/</li>
             <li>
-              <Link href="/search" className="hover:text-[var(--color-accent)]">
+              <Link href="/data/search" className="hover:text-[var(--color-accent)]">
                 Ricerca
               </Link>
             </li>
@@ -157,11 +157,6 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
                       {subject}
                     </span>
                   ))}
-                  {book.Subject.length > 5 && (
-                    <span className="text-gray-500 text-sm ml-1 self-center">
-                      +{book.Subject.length - 5} altri
-                    </span>
-                  )}
                 </div>
               </BookDetailSection>
             )}

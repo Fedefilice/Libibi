@@ -3,7 +3,6 @@
 
 import type { Books, Authors, Book_Authors } from '../generated/prisma';
 import { OpenLibraryBookResult, OpenLibraryAuthorResult } from './open_library_types';
-import { apiCache } from './api-cache';
 
 export class OpenLibraryService {
   // URL endpoint dell'API Open Library
@@ -74,13 +73,6 @@ export class OpenLibraryService {
 
   public async getListBookAsync(searchQuery: string): Promise<OpenLibraryBookResult[]> {
     try {
-      // Verifica se la ricerca è in cache
-      const cachedResults = apiCache.getSearch(searchQuery);
-      if (cachedResults) {
-        console.log(`Risultati da cache per ricerca "${searchQuery}"`);
-        return cachedResults;
-      }
-      
       // Costruisce URL con parametri di ricerca
       const searchParams = new URLSearchParams({
         q: searchQuery,
@@ -137,8 +129,6 @@ export class OpenLibraryService {
           console.error(`Errore elaborazione libro: ${ex}`);
         }
       }
-      // Salva risultati in cache
-      apiCache.setSearch(searchQuery, booksList);
       return booksList;
     } catch (ex) {
       console.error(`Errore ricerca libri: ${ex}`);
@@ -148,13 +138,6 @@ export class OpenLibraryService {
 
   public async getBookAsync(workKey: string): Promise<OpenLibraryBookResult | null> {
     try {
-      // Verifica se il libro è in cache
-      const cachedBook = apiCache.getBook(workKey);
-      if (cachedBook) {
-        console.log(`Dettagli libro da cache per "${workKey}"`);
-        return cachedBook;
-      }
-      
       // Chiamata API per dettagli libro
       const bookDetailsUrl = OpenLibraryService.BOOK_DETAILS_URL.replace('{0}', workKey);
       
@@ -198,9 +181,6 @@ export class OpenLibraryService {
         description: bookDescription
       };
       
-      // Salva in cache
-      apiCache.setBook(workKey, bookResult);
-      
       return bookResult;
     } catch (ex) {
       console.error(`Errore recupero libro '${workKey}': ${ex}`);
@@ -210,13 +190,6 @@ export class OpenLibraryService {
 
   public async getAuthorAsync(authorKey: string): Promise<OpenLibraryAuthorResult | null> {
     try {
-      // Verifica se l'autore è in cache
-      const cachedAuthor = apiCache.getAuthor(authorKey);
-      if (cachedAuthor) {
-        console.log(`Dettagli autore da cache per "${authorKey}"`);
-        return cachedAuthor;
-      }
-      
       // Chiamata API per dettagli autore
       const authorDetailsUrl = OpenLibraryService.AUTHOR_DETAILS_URL.replace('{0}', authorKey);
       
@@ -256,9 +229,6 @@ export class OpenLibraryService {
         bio: authorBiography,
         imageUrl: authorImageUrl
       };
-      
-      // Salva in cache
-      apiCache.setAuthor(authorKey, authorResult);
       
       return authorResult;
     } catch (ex) {

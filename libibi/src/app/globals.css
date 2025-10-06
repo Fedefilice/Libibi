@@ -16,12 +16,14 @@ html, body {
 
 body {
   min-height: 100vh;
+  font-size: 1.25rem; /* text-xl = 1.25rem */
+  line-height: 1.75rem;
 }
 
 @layer components {
   /* Pulsanti base */
   .btn {
-    @apply inline-flex items-center justify-center px-6 py-2 rounded-full font-medium shadow transition-all duration-150;
+    @apply inline-flex items-center justify-center px-6 py-2 rounded-full font-medium shadow;
   }
 
   /* Pulsante accent (CTA) */

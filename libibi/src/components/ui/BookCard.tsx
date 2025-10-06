@@ -27,7 +27,7 @@ const BookCard: React.FC<BookCardProps> = ({
     <div className={`w-full max-w-[253px] flex ${className}`}>
       <div className="bg-[var(--color-card)] shadow-md rounded-lg overflow-hidden w-full flex flex-col">
         <div className="bg-gray-100 w-full">
-          <Link href={`/book/${encodeURIComponent(book.WorkKey)}`}>
+          <Link href={`/data/book/${encodeURIComponent(book.WorkKey)}`}>
             <div className="w-full h-[276px] relative flex justify-center items-center">
               <Image 
                 src={book.CoverUrl || "/book-image.jpg"} 
@@ -48,7 +48,7 @@ const BookCard: React.FC<BookCardProps> = ({
         
         <div className="p-6 bg-[var(--color-card)] flex flex-col flex-1">
           <Link 
-            href={`/book/${encodeURIComponent(book.WorkKey)}`}
+            href={`/data/book/${encodeURIComponent(book.WorkKey)}`}
             className="block text-center"
           >
             <h3 className="text-xl font-bold text-[var(--color-black)] mb-2 hover:underline line-clamp-2 h-[60px] flex items-center justify-center" title={book.Title}>
@@ -63,7 +63,7 @@ const BookCard: React.FC<BookCardProps> = ({
                     {index > 0 && ", "}
                     {book.AuthorKey && book.AuthorKey[index] ? (
                       <Link 
-                        href={`/author/${encodeURIComponent(book.AuthorKey[index])}`} 
+                        href={`/data/author/${encodeURIComponent(book.AuthorKey[index])}`} 
                         className="hover:underline"
                       >
                         {authorName}

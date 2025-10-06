@@ -7,11 +7,11 @@ import { openLibraryService } from '../../../../services/open_library_services';
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const authorId = searchParams.get('authorId') || '';
+  const authorId = searchParams.get('authorId') || searchParams.get('authorKey') || '';
   
   if (!authorId) {
     return NextResponse.json(
-      { errore: 'authorId non valido' },
+      { errore: 'authorId o authorKey non valido' },
       { status: 400 }
     );
   }

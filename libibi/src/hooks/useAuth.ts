@@ -12,6 +12,7 @@ export function useIsLoggedIn() {
   useEffect(() => {
     function checkToken() {
       const token = Cookies.get(TOKEN_COOKIE);
+      console.log("Cookie libibi_auth_token:", token); // Debug
       setIsLoggedIn(!!token);
     }
     

@@ -46,8 +46,7 @@ export default function Home() {
                 className="text-xl mb-8 text-center max-w-2xl drop-shadow"
                 style={{ color: "var(--color-card)" }}
               >
-                Il tuo rifugio personale per organizzare le tue letture e scoprire
-                nuovi mondi attraverso i libri.
+                Il tuo rifugio personale per curare le tue letture ed esplorare nuovi mondi attraverso i libri.
               </p>
               {!isLoggedIn && <AuthNavigation />}
             </div>
