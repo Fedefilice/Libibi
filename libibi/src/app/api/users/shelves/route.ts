@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
   else request.input('finished', sql.Date, null);
   const updateRes = await request.query(updateSql);
     if (updateRes.rowsAffected && updateRes.rowsAffected[0] > 0) {
+      console.log(`User_Shelves: updated for user=${userID} book=${bookID} status=${normalizedStatus}`);
       return NextResponse.json({ Result: 'Updated' });
     }
 
@@ -89,6 +90,7 @@ export async function POST(req: NextRequest) {
     insertRequest.input('status', sql.NVarChar(20), normalizedStatus);
     try {
       await insertRequest.query(insertSql);
+      console.log(`User_Shelves: inserted for user=${userID} book=${bookID} status=${normalizedStatus}`);
     } catch (err: any) {
       // SQLServer da errore 2627 o 2601 in caso di violazione di vincolo di unicità
       const msg = err?.message ?? String(err);
@@ -130,9 +132,11 @@ export async function GET(req: NextRequest) {
       ? `SELECT us.userID, us.bookID, us.status, us.started_reading_date, us.finished_reading_date, us.last_updated, b.title, b.coverImageURL FROM User_Shelves us LEFT JOIN Books b ON us.bookID = b.bookID WHERE us.userID=@userID AND us.bookID=@bookID ORDER BY us.last_updated DESC`
       : `SELECT us.userID, us.bookID, us.status, us.started_reading_date, us.finished_reading_date, us.last_updated, b.title, b.coverImageURL FROM User_Shelves us LEFT JOIN Books b ON us.bookID = b.bookID WHERE us.userID=@userID ORDER BY us.last_updated DESC`;
     if (bookIDFilter) request.input('bookID', sql.NVarChar(64), bookIDFilter);
-    const result = await request.query(sqlText);
-    const rows = result.recordset || [];
-    return NextResponse.json(rows.map((r: any) => ({
+  const result = await request.query(sqlText);
+  const rows = result.recordset || [];
+  console.log(`User_Shelves: GET for user=${userID} returned ${rows.length} rows`);
+  if (rows.length > 0) console.log('User_Shelves first row:', rows[0]);
+  return NextResponse.json(rows.map((r: any) => ({
       userID: r.userID,
       bookID: r.bookID,
       status: r.status,

@@ -17,7 +17,9 @@ export async function validateUserAsync(username: string, password: string): Pro
   const pool = await connectToDatabase();
   const request = pool.request();
   request.input('Username', sql.NVarChar(100), username);
-  request.input('Password', sql.NVarChar(sql.MAX === 'Max' ? 255 : 255, 255) as any, password); // fallback type, DB column size handled by DB
+  // Use a fixed length for the password parameter. The previous expression compared unrelated types and caused
+  // a compile-time error. 255 is a safe fallback for NVARCHAR password columns.
+  request.input('Password', sql.NVarChar(255), password);
 
   const result = await request.query('SELECT COUNT(*) as cnt FROM Users WHERE Username = @Username AND Passwd = @Password');
   const count = result.recordset[0]?.cnt ?? 0;

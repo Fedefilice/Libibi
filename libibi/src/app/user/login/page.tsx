@@ -26,16 +26,18 @@ export default function LoginPage() {
         return;
       }
       const data = await res.json();
-      // Save user info to localStorage and set authentication cookie
+      // Salva i dati utente e le credenziali in localStorage
       try {
         if (typeof window !== 'undefined') {
+          // Salva i dati utente e le credenziali Basic auth in modo che altri codici client possano chiamare API protette
           localStorage.setItem('libibi_user', JSON.stringify(data));
+          localStorage.setItem('libibi_credentials', JSON.stringify({ username, password }));
           setLoginCookie("authenticated", 7); // Cookie valido per 7 giorni
         }
       } catch (e) {
         console.error("Errore nel salvataggio delle credenziali:", e);
       }
-      // On success, redirect to home
+      // Se la login ha successo, reindirizza alla home
       router.push("/");
     } catch (err: any) {
       setError(err?.message || "Errore di rete");
