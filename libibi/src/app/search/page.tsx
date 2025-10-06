@@ -2,17 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-
-// Definizione del tipo per i risultati di ricerca
-type BookSearchResult = {
-  Title: string;
-  AuthorName: string[];
-  CoverUrl: string | null;
-  Rating: number | null;
-  AuthorKey: string[];
-  WorkKey: string;
-};
+import BookCard from "../../components/ui/BookCard";
+import { BookSearchResult } from "../../types/book";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,51 +121,17 @@ export default function SearchPage() {
         </div>
       </form>
 
-      {/* Risultati della ricerca */}
-      {searchResults.length > 0 ? (
+      {/* Indicatore di caricamento durante la ricerca */}
+      {loading || loadingOpenLibrary ? (
+        <div className="text-center mt-8">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-accent)] border-t-transparent mb-4"></div>
+          <p className="text-lg text-[var(--color-foreground)]">Ricerca in corso...</p>
+        </div>
+      ) : searchResults.length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center max-w-5xl mx-auto">
             {searchResults.map((book) => (
-              <div key={book.WorkKey} className="w-full max-w-[253px] flex"> {/* 220px + 15% = 253px */}
-                <div className="bg-[var(--color-card)] shadow-md overflow-hidden rounded-lg flex flex-col w-full h-full">
-                  <div className="bg-gray-100 w-full">
-                    {/* Area immagine con dimensioni fisse */}
-                    <Link href={`/book/${encodeURIComponent(book.WorkKey)}`}>
-                      <div className="w-full h-[276px] relative flex justify-center items-center"> {/* 240px + 15% = 276px */}
-                        <Image 
-                          src={book.CoverUrl || "/book-image.jpg"} 
-                          alt={`Copertina di ${book.Title}`} 
-                          fill
-                          className="object-contain"
-                          onError={(e) => {
-                            // Fallback se l'immagine non si carica
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null; // Previene loop infiniti
-                            target.src = "/book-image.jpg";
-                          }}
-                        />
-                      </div>
-                    </Link>
-                  </div>
-                  
-                  {/* Info libro con altezza fissa */}
-                  <div className="p-6 bg-[var(--color-card)] flex flex-col flex-1">
-                    <Link 
-                      href={`/book/${encodeURIComponent(book.WorkKey)}`}
-                      className="block text-center"
-                    >
-                      <h3 className="text-xl font-bold text-[var(--color-black)] mb-2 hover:underline line-clamp-2 h-[60px] flex items-center justify-center">
-                        {book.Title}
-                      </h3>
-                    </Link>
-                    <p className="text-[var(--color-accent)] mb-5 line-clamp-1 h-[28px] text-center">
-                      {book.AuthorName && book.AuthorName.length > 0 
-                        ? book.AuthorName.join(", ") 
-                        : "Autore sconosciuto"}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <BookCard key={book.WorkKey} book={book} />
             ))}
           </div>
           
@@ -202,7 +159,7 @@ export default function SearchPage() {
           <p className="var(--color-accent)">{error}</p>
           <p className="text-sm text-gray-600 mt-2">Prova a modificare i termini di ricerca o riprova più tardi.</p>
         </div>
-      ) : hasSearched && searchResults.length === 0 ? (
+      ) : hasSearched && !loading && !loadingOpenLibrary ? (
         <div className="text-center mt-8">
           <p className="text-lg text-[var(--color-foreground)]">Nessun risultato trovato per "{searchQuery}".</p>
           <p className="text-sm text-gray-600 mt-2">Prova con un'altra parola chiave o verifica l'ortografia.</p>
