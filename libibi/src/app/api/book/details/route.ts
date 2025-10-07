@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase, sql } from '../../../../../lib/db';
 import { openLibraryService } from '../../../../services/open_library_services';
+import { BookDetail } from '@/types/book';
 
 /**
  * Endpoint API per ottenere i dettagli di un libro
@@ -38,19 +39,7 @@ export async function GET(request: NextRequest) {
       const firstRow = result.recordset[0];
       
       // Estraiamo i dati base del libro
-      const bookData: {
-        WorkKey: string;
-        Title: string;
-        FirstPublishYear: string | null;
-        NumberOfPagesMedian: number | null;
-        Rating: number | null;
-        Description: string | null;
-        SubjectsJson: string | null;
-        CoverUrl: string | null;
-        Author: string[];
-        AuthorKey: string[];
-        Subject?: string[];
-      } = {
+      const bookData = {
         WorkKey: firstRow.bookID,
         Title: firstRow.title,
         FirstPublishYear: firstRow.firstPublicationYear,
@@ -59,8 +48,9 @@ export async function GET(request: NextRequest) {
         Description: firstRow.bookDescription,
         SubjectsJson: firstRow.subjectsJson,
         CoverUrl: firstRow.coverImageURL,
-        Author: [],
-        AuthorKey: []
+        Author: [] as string[],
+        AuthorKey: [] as string[],
+        Subject: [] as string[]
       };
       
       // Raccogliamo tutti gli autori associati al libro
@@ -87,7 +77,7 @@ export async function GET(request: NextRequest) {
       bookData.Subject = subjects;
       
       // Creiamo un nuovo oggetto omettendo SubjectsJson
-      const responseData = {
+      const responseData: BookDetail = {
         WorkKey: bookData.WorkKey,
         Title: bookData.Title,
         FirstPublishYear: bookData.FirstPublishYear,
@@ -165,15 +155,15 @@ export async function GET(request: NextRequest) {
     }
     
     // Trasforma i dati nel formato di risposta desiderato
-    const response = {
-      WorkKey: bookDetail.workKey,
-      Title: bookDetail.title,
-      FirstPublishYear: bookDetail.firstPublishYear,
-      NumberOfPagesMedian: bookDetail.numberOfPagesMedian,
+    const response: BookDetail = {
+      WorkKey: bookDetail.workKey || '',
+      Title: bookDetail.title || '',
+      FirstPublishYear: bookDetail.firstPublishYear || null,
+      NumberOfPagesMedian: bookDetail.numberOfPagesMedian || null,
       Rating: null,
-      Description: bookDetail.description,
+      Description: bookDetail.description || null,
       Subject: bookDetail.subject || [],
-      CoverUrl: bookDetail.coverUrl,
+      CoverUrl: bookDetail.coverUrl || null,
       Author: bookDetail.author || [],
       AuthorKey: bookDetail.authorKey || []
     };

@@ -7,7 +7,7 @@ export default function NotFound() {
         <h2 className="text-3xl font-bold text-yellow-600 mb-4">Libro non trovato</h2>
         <p className="text-gray-700 mb-6">Spiacenti, non siamo riusciti a trovare il libro che stai cercando.</p>
         <Link 
-          href="/data/search" 
+          href="/search" 
           className="inline-block px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-foreground)] transition-colors"
         >
           Torna alla ricerca

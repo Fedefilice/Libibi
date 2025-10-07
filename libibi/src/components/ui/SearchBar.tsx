@@ -1,13 +1,7 @@
 "use client";
 
 import React from 'react';
-
-interface SearchBarProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  loading: boolean;
-  handleSearch: (e: React.FormEvent) => void;
-}
+import { SearchBarProps } from '@/types/ui';
 
 export default function SearchBar({ searchQuery, setSearchQuery, loading, handleSearch }: SearchBarProps) {
   return (

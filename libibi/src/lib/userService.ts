@@ -1,16 +1,7 @@
 import { connectToDatabase, sql } from '../../lib/db';
+import { UserRecord } from '@/types/user';
 
 // Libreria per la gestione degli utenti, usata dalle API e potenzialmente da altre parti dell'applicazione
-
-export type UserRecord = {
-  userID: number;
-  nome: string | null;
-  cognome: string | null;
-  username: string | null;
-  email: string | null;
-  passwd: string | null;
-  admin: boolean;
-};
 
 // Valida credenziali utente e restituisce valore booleano, non restituisce le credenziali, ma serve solo per validazione
 export async function validateUserAsync(username: string, password: string): Promise<boolean> {

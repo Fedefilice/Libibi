@@ -1,15 +1,5 @@
 import { useState, useEffect } from 'react';
-
-export interface AuthorDetail {
-  AuthorKey?: string;
-  Name?: string;
-  PersonalName?: string;
-  BirthDate?: string;
-  TopWork?: string;
-  WorkCount?: number;
-  Bio?: string;
-  ImageUrl?: string;
-}
+import { AuthorDetail } from '@/types/book';
 
 export function useAuthorDetails(authorKey: string) {
   const [author, setAuthor] = useState<AuthorDetail | null>(null);

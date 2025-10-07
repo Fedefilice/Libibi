@@ -1,23 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { Review, ReviewsListProps } from '@/types/review';
 
 // Serve per mostrare le recensioni pubbliche, eventualmente filtrate per libro
 
-type Review = {
-  reviewID: string;
-  bookID: string;
-  bookTitle?: string | null;
-  userID: number;
-  username?: string | null;
-  parentReviewID?: string | null;
-  rating: number;
-  reviewTitle?: string | null;
-  reviewText?: string | null;
-  reviewDate?: string | null;
-};
-
-export default function ReviewsList({ bookID, limit = 6 }: { bookID?: string | null; limit?: number }) {
+export default function ReviewsList({ bookID, limit = 6 }: ReviewsListProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

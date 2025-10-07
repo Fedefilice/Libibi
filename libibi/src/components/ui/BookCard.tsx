@@ -1,21 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-export type BookCardProps = {
-  book: {
-    Title: string;
-    AuthorName: string[];
-    CoverUrl: string | null;
-    Rating: number | null;
-    AuthorKey?: string[];
-    WorkKey: string;
-    isExternal?: boolean;
-  };
-  onAddToLibrary?: () => void;
-  showAddButton?: boolean;
-  className?: string;
-};
+import { BookCardProps } from '@/types/book';
 
 const BookCard: React.FC<BookCardProps> = ({
   book,
@@ -27,7 +13,7 @@ const BookCard: React.FC<BookCardProps> = ({
     <div className={`w-full max-w-[253px] flex ${className}`}>
       <div className="bg-[var(--color-card)] shadow-md rounded-lg overflow-hidden w-full flex flex-col">
         <div className="bg-gray-100 w-full">
-          <Link href={`/data/book/${encodeURIComponent(book.WorkKey)}`}>
+          <Link href={`/book/${encodeURIComponent(book.WorkKey)}`}>
             <div className="w-full h-[276px] relative flex justify-center items-center">
               <Image
                 src={book.CoverUrl || "/book-image.jpg"}
@@ -47,7 +33,7 @@ const BookCard: React.FC<BookCardProps> = ({
         </div>
 
         <div className="p-6 bg-[var(--color-card)] flex flex-col flex-1">
-          <Link href={`/data/book/${encodeURIComponent(book.WorkKey)}`} className="block text-center">
+          <Link href={`/book/${encodeURIComponent(book.WorkKey)}`} className="block text-center">
             <h3 className="text-xl font-bold text-[var(--color-black)] mb-2 hover:underline line-clamp-2 h-[60px] flex items-center justify-center" title={book.Title}>
               {book.Title}
             </h3>
@@ -59,7 +45,7 @@ const BookCard: React.FC<BookCardProps> = ({
                   <span key={index}>
                     {index > 0 && ", "}
                     {book.AuthorKey && book.AuthorKey[index] ? (
-                      <Link href={`/data/author/${encodeURIComponent(book.AuthorKey[index])}`} className="hover:underline">
+                      <Link href={`/author/${encodeURIComponent(book.AuthorKey[index])}`} className="hover:underline">
                         {authorName}
                       </Link>
                     ) : (

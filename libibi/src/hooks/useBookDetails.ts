@@ -1,27 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-
-// Definizione del tipo per i dettagli completi del libro
-export interface BookDetail {
-  WorkKey: string;
-  Title: string;
-  FirstPublishYear: string | null;
-  NumberOfPagesMedian: number | null;
-  Rating: number | null;
-  Description: string | null;
-  Subject: string[];
-  CoverUrl: string | null;
-  Author: string[];
-  AuthorKey: string[];
-}
-
-interface BookDetailResponse {
-  success?: boolean;
-  result?: BookDetail;
-  Messaggio?: string;
-  errore?: string;
-}
+import { BookDetail, BookDetailResponse } from '@/types/book';
 
 /**
  * Hook per recuperare i dettagli di un libro specificato dall'ID

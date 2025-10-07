@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import bookIndex from "./book_index.jpg";
+import bookIndex from "../../public/book_index.jpg";
 import { AuthNavigation } from "./components/navigation";
 import { useIsLoggedIn } from "../hooks/useAuth";
 import ReviewsList from '../components/ui/ReviewsList';
 
 export default function Home() {
-  const isLoggedIn = useIsLoggedIn();  
+  const { isLoggedIn } = useIsLoggedIn();  
   // Debug - verifica il valore corretto
   console.log("Stato login:", isLoggedIn);
   

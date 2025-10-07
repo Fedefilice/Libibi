@@ -3,16 +3,7 @@
 // Serve per mostrare le recensioni scritte dall'utente loggato
 
 import React, { useEffect, useState } from 'react';
-
-type Review = {
-  reviewID: string;
-  bookID: string;
-  bookTitle?: string | null;
-  rating: number;
-  reviewTitle?: string | null;
-  reviewText?: string | null;
-  reviewDate?: string | null;
-};
+import { Review } from '@/types/review';
 
 export default function UserReviewsList() {
   const [reviews, setReviews] = useState<Review[]>([]);

@@ -2,13 +2,9 @@
 
 import React, { useState } from 'react';
 import { useEffect } from 'react';
+import { CreateReviewProps } from '@/types/review';
 
-type Props = {
-  bookID: string;
-  onSuccess?: () => void;
-};
-
-export default function CreateReview({ bookID, onSuccess }: Props) {
+export default function CreateReview({ bookID, onSuccess }: CreateReviewProps) {
   const [rating, setRating] = useState<number>(5);
   const [title, setTitle] = useState<string>('');
   const [text, setText] = useState<string>('');

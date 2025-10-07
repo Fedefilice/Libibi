@@ -2,14 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireBasicAuth } from '../../../lib/basicAuth';
 import { connectToDatabase, sql } from '../../../../lib/db';
-
-type ReviewInput = {
-  bookID: string;
-  parentReviewID?: string | null;
-  rating: number;
-  reviewTitle?: string | null;
-  reviewText?: string | null;
-};
+import { ReviewInput } from '@/types/review';
 
 // POST: aggiunge una recensione (richiede Basic Auth)
 export async function POST(req: NextRequest) {

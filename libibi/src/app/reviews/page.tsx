@@ -1,5 +1,4 @@
 import React from 'react';
-import Link from 'next/link';
 import ReviewsList from '@/components/ui/ReviewsList';
 
 export const metadata = {
@@ -10,9 +9,8 @@ export default function ReviewsPage() {
   return (
     <div className="container mx-auto px-8 py-12">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <h1 className="text-2xl font-semibold text-[var(--color-foreground)]">Recensioni pubbliche</h1>
-          <Link href="/" className="text-sm text-[var(--color-accent)] hover:underline">Torna alla home</Link>
         </div>
 
         <p className="text-gray-600 mb-6">Qui trovi tutte le recensioni pubblicate dagli utenti. Se ti serve la recensione di un libro in particolare, cercalo sopra e vedrai tutte le recensioni inerenti.</p>

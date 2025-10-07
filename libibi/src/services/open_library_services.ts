@@ -2,7 +2,7 @@
 // Permette di cercare libri tramite parole chiave.
 
 import type { Books, Authors, Book_Authors } from '../generated/prisma';
-import { OpenLibraryBookResult, OpenLibraryAuthorResult } from './open_library_types';
+import { OpenLibraryBookResult, OpenLibraryAuthorResult } from '@/types/openLibrary';
 
 export class OpenLibraryService {
   // URL endpoint dell'API Open Library
