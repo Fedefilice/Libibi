@@ -34,12 +34,12 @@ const BookCard: React.FC<BookCardProps> = ({
 
         <div className="p-6 bg-[var(--color-card)] flex flex-col flex-1">
           <Link href={`/book/${encodeURIComponent(book.WorkKey)}`} className="block text-center">
-            <h3 className="text-xl font-bold text-[var(--color-black)] mb-2 hover:underline line-clamp-2 h-[60px] flex items-center justify-center" title={book.Title}>
+            <h3 className="text-xl font-bold text-[var(--color-black)] mb-3 hover:underline line-clamp-2 h-[60px] flex items-center justify-center" title={book.Title}>
               {book.Title}
             </h3>
           </Link>
 
-          <p className="text-sm text-[var(--color-accent)] mb-4 line-clamp-1 text-center">
+          <p className="text-base text-[var(--color-accent)] mb-4 line-clamp-1 text-center">
             {book.AuthorName && book.AuthorName.length > 0
               ? book.AuthorName.map((authorName, index) => (
                   <span key={index}>

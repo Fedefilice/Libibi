@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useBookDetails, BookDetail } from '../../../../hooks/useBookDetails';
-import BookCard from '../../../../components/ui/BookCard';
-import CreateReview from '../../../../components/ui/CreateReview';
-import ReviewsList from '../../../../components/ui/ReviewsList';
+import { useBookDetails } from '../../../../hooks/useBookDetails';
+import BookCard from '../../../../components/book/BookCard';
+import AddToLibrary from '../../../../components/book/AddToLibrary';
+import BookReviewsSection from '../../../../components/book/BookReviewsSection';
 import { Breadcrumb } from '../../../components/navigation';
 
 // Pagina di dettaglio del libro
@@ -28,7 +28,9 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
   const [needLoginPrompt, setNeedLoginPrompt] = useState(false);
   const [bookPresent, setBookPresent] = useState(false);
   const [serverStatus, setServerStatus] = useState<string | null>(null);
-  const [reviewsRefreshKey, setReviewsRefreshKey] = useState(0);
+
+  const [userHasReviewed, setUserHasReviewed] = useState(false);
+  const [hasReviews, setHasReviews] = useState(false);
 
   const statusLabelMap: Record<string, string> = {
     WantToRead: 'Voglio leggerlo',
@@ -185,6 +187,50 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
     }
   }
 
+  // Controlla se l'utente ha già recensito il libro
+  async function checkUserReview() {
+    try {
+      const creds = getStoredCreds();
+      if (!creds) {
+        setUserHasReviewed(false);
+        return;
+      }
+      
+      const auth = btoa(`${creds.username}:${creds.password}`);
+      const res = await fetch('/api/review/user', { headers: { Authorization: `Basic ${auth}` } });
+      
+      if (!res.ok) {
+        setUserHasReviewed(false);
+        return;
+      }
+      
+      const reviews = await res.json();
+      const hasReviewed = Array.isArray(reviews) && reviews.some((r: any) => r.bookID === bookId);
+      setUserHasReviewed(hasReviewed);
+    } catch (ex) {
+      console.error('Errore controllando recensione utente', ex);
+      setUserHasReviewed(false);
+    }
+  }
+
+  // Controlla se ci sono recensioni per questo libro
+  async function checkBookReviews() {
+    try {
+      const res = await fetch(`/api/review?bookId=${encodeURIComponent(bookId)}`);
+      if (!res.ok) {
+        setHasReviews(false);
+        return;
+      }
+      
+      const reviews = await res.json();
+      const reviewsExist = Array.isArray(reviews) && reviews.length > 0;
+      setHasReviews(reviewsExist);
+    } catch (ex) {
+      console.error('Errore controllando recensioni libro', ex);
+      setHasReviews(false);
+    }
+  }
+
   useEffect(() => {
     async function loadShelf() {
       try {
@@ -211,7 +257,10 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
         console.error('Errore caricando lo stato della scaffale', ex);
       }
     }
+    
     loadShelf();
+    checkUserReview();
+    checkBookReviews();
   }, [bookId]);
 
   if (loading) {
@@ -269,19 +318,29 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div className="md:col-span-1">
-              <div className="flex justify-center">
-              <BookCard
-                book={{
-                  Title: book.Title,
-                  AuthorName: book.Author,
-                  CoverUrl: book.CoverUrl,
-                  Rating: book.Rating,
-                  AuthorKey: book.AuthorKey,
-                  WorkKey: book.WorkKey
-                }}
-                showAddButton={false}
-                className="transform scale-95"
-              />
+              <div className="flex flex-col items-center space-y-6">
+                <BookCard
+                  book={{
+                    Title: book.Title,
+                    AuthorName: book.Author,
+                    CoverUrl: book.CoverUrl,
+                    Rating: book.Rating,
+                    AuthorKey: book.AuthorKey,
+                    WorkKey: book.WorkKey
+                  }}
+                  showAddButton={false}
+                />
+                
+                <AddToLibrary
+                  status={status}
+                  onStatusChange={setStatus}
+                  bookPresent={bookPresent}
+                  adding={adding}
+                  needLoginPrompt={needLoginPrompt}
+                  flash={flash}
+                  onAddToLibrary={handleAddToLibrary}
+                  onRemoveFromLibrary={handleRemoveFromLibrary}
+                />
               </div>
           </div>
 
@@ -325,66 +384,23 @@ export default function BookPage({ params }: { params: { id: string } | Promise<
                   {book.Subject.slice(0, 5).map((subject: string, index: number) => (
                     <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">{subject}</span>
                   ))}
-                  {book.Subject.length > 5 && (
-                    <span className="text-gray-500 text-sm ml-1 self-center">+{book.Subject.length - 5} altri</span>
-                  )}
                 </div>
               </BookDetailSection>
             )}
 
-            <div className="mt-6 p-4 bg-white rounded shadow-sm max-w-md">
-              <h3 className="text-lg font-medium mb-3">Aggiungi alla tua libreria</h3>
-              <div className="flex items-center gap-3 mb-3">
-                <label className="text-sm">Stato:</label>
-                <select value={status} onChange={(e) => setStatus(e.target.value)} className="border rounded px-3 py-2">
-                  <option value="want_to_read">Voglio leggerlo</option>
-                  <option value="reading">Sto leggendo</option>
-                  <option value="finished">Letto</option>
-                  <option value="abandoned">Abbandonato</option>
-                </select>
-              </div>
-
-              <div>
-                {!bookPresent ? (
-                  <div>
-                    <button disabled={adding} onClick={handleAddToLibrary} className="px-6 py-3 bg-[#a86c3c] text-white rounded">
-                      {adding ? 'Aggiungendo...' : 'Aggiungi alla libreria'}
-                    </button>
-                    {needLoginPrompt && (
-                      <div className="mt-3 text-sm text-red-700">
-                        Devi essere <a href="/login" className="underline font-medium">loggato</a> per aggiungere un libro alla tua libreria.
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <button onClick={handleRemoveFromLibrary} className="px-6 py-3 bg-gray-200 text-[#a86c3c] rounded border border-gray-300">Rimuovi dalla libreria</button>
-                )}
-              </div>
-
-              {flash && (
-                <div className={`mt-4 p-3 rounded transition-opacity duration-300 ${flash.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
-                  {flash.text}
-                </div>
-              )}
-            </div>
-             <div className="mt-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    {/* Form recensione smooth */}
-                    <details className="create-review-collapse rounded p-3">
-                      <summary className="cursor-pointer font-medium text-[var(--color-accent)]">Lo hai letto? Recensiscilo</summary>
-                      <div className="mt-3">
-                        <CreateReview bookID={book.WorkKey} onSuccess={() => setReviewsRefreshKey(k => k + 1)} />
-                      </div>
-                    </details>
-                  </div>
-                  <div>
-                    <ReviewsList bookID={book.WorkKey} limit={8} key={reviewsRefreshKey} />
-                  </div>
-                </div>
-            </div>
           </div>
         </div>
+
+        {/* Sezione Recensioni - Visibile solo se ci sono recensioni o se l'utente può aggiungerne una */}
+        {(hasReviews || !userHasReviewed) && (
+          <BookReviewsSection
+            bookID={book.WorkKey}
+            userHasReviewed={userHasReviewed}
+            hasReviews={hasReviews}
+            onUserReviewChange={setUserHasReviewed}
+            onReviewsChange={setHasReviews}
+          />
+        )}
       </div>
     </div>
   );

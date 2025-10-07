@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { clearLoginCookie, useIsLoggedIn } from '@/hooks/useAuth';
-import UserReviewsList from '@/components/ui/UserReviewsList';
-import BookShelfList from '@/components/ui/BookShelfList';
+import UserReviewsList from '@/components/reviews/UserReviewsList';
+import BookShelfList from '@/components/book/BookShelfList';
 import { User, MenuTab, BookShelf, ConfirmRemovalState } from '@/types/user';
 
 // Pagina del profilo utente
@@ -177,6 +177,7 @@ export default function ProfilePage() {
             error={shelvesError}
             emptyMessage='La tua lista "Voglio leggere" è vuota.'
             onRemoveBook={handleRemoveRequest}
+            onChangeStatus={handleChangeStatus}
             showDateInfo="last_updated"
             removingBookId={removingBookId}
           />
@@ -191,6 +192,7 @@ export default function ProfilePage() {
             error={shelvesError}
             emptyMessage='La tua lista "Sto leggendo" è vuota.'
             onRemoveBook={handleRemoveRequest}
+            onChangeStatus={handleChangeStatus}
             showDateInfo="started_reading_date"
             removingBookId={removingBookId}
           />
@@ -205,6 +207,7 @@ export default function ProfilePage() {
             error={shelvesError}
             emptyMessage='La tua lista "Letto" è vuota.'
             onRemoveBook={handleRemoveRequest}
+            onChangeStatus={handleChangeStatus}
             showDateInfo="finished_reading_date"
             removingBookId={removingBookId}
           />
@@ -219,6 +222,7 @@ export default function ProfilePage() {
             error={shelvesError}
             emptyMessage='La tua lista "Abbandonato" è vuota.'
             onRemoveBook={handleRemoveRequest}
+            onChangeStatus={handleChangeStatus}
             showDateInfo="none"
             removingBookId={removingBookId}
           />
@@ -229,7 +233,9 @@ export default function ProfilePage() {
             <h1 className="text-3xl font-serif border-b border-[var(--color-accent)] pb-2 mb-8 text-[var(--color-foreground)]">
               Le mie recensioni
             </h1>
-            <UserReviewsList />
+            <div className="card">
+              <UserReviewsList />
+            </div>
           </>
         );
       case 'impostazioni':
@@ -265,6 +271,48 @@ export default function ProfilePage() {
     const title = book?.title || bookID;
     
     setConfirmRemoval({ bookID, status: currentStatus, title });
+  }
+
+  async function handleChangeStatus(bookID: string, newStatus: string) {
+    try {
+      const auth = getAuthHeader();
+      if (!auth) {
+        setShelvesError('Devi essere loggato per modificare lo stato del libro');
+        return;
+      }
+
+      // Mappa i valori di status per l'API
+      const statusMap: Record<string, string> = {
+        'WantToRead': 'want_to_read',
+        'Reading': 'reading',
+        'Read': 'finished',
+        'Abandoned': 'abandoned'
+      };
+
+      const apiStatus = statusMap[newStatus] || newStatus.toLowerCase();
+
+      const body = { bookID, status: apiStatus };
+      const res = await fetch('/api/users/shelves', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: auth 
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setShelvesError(err?.Errore || 'Errore aggiornando lo stato del libro');
+        return;
+      }
+
+      // Ricarica le liste
+      await fetchShelves();
+    } catch (ex: any) {
+      console.error('handleChangeStatus error', ex);
+      setShelvesError('Errore di rete durante il cambio di stato');
+    }
   }
 
   async function confirmRemoveFromLibrary() {

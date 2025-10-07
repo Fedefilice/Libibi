@@ -19,6 +19,7 @@ export type BookShelfListProps = {
   error: string | null;
   emptyMessage: string;
   onRemoveBook: (bookID: string, currentStatus: string) => void;
+  onChangeStatus: (bookID: string, newStatus: string) => void;
   showDateInfo?: 'last_updated' | 'started_reading_date' | 'finished_reading_date' | 'none';
   removingBookId?: string | null;
 };

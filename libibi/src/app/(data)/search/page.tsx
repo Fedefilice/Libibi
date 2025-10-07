@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import BookCard from "../../../components/ui/BookCard";
+import BookCard from "../../../components/book/BookCard";
 import { BookSearchResult } from "../../../types/book";
 
 export default function SearchPage() {

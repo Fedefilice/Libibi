@@ -1,5 +1,5 @@
 import React from 'react';
-import ReviewsList from '@/components/ui/ReviewsList';
+import ReviewsList from '@/components/reviews/ReviewsList';
 
 export const metadata = {
   title: 'Recensioni - Libibi'

@@ -98,10 +98,11 @@ export async function GET(req: NextRequest) {
     const request = pool.request();
     request.input('bookID', sql.NVarChar(64), bookId);
     const result = await request.query(`
-      SELECT reviewID, bookID, userID, parentReviewID, rating, reviewTitle, reviewText, reviewDate
-      FROM Reviews
-      WHERE bookID = @bookID AND is_deleted = 0
-      ORDER BY reviewDate DESC
+      SELECT r.reviewID, r.bookID, r.userID, u.username as username, r.parentReviewID, r.rating, r.reviewTitle, r.reviewText, r.reviewDate
+      FROM Reviews r
+      LEFT JOIN Users u ON u.userID = r.userID
+      WHERE r.bookID = @bookID AND r.is_deleted = 0
+      ORDER BY r.reviewDate DESC
     `);
     return NextResponse.json(result.recordset);
   } catch (ex: any) {
