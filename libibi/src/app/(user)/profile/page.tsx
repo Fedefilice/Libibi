@@ -178,7 +178,7 @@ export default function ProfilePage() {
             emptyMessage='La tua lista "Voglio leggere" è vuota.'
             onRemoveBook={handleRemoveRequest}
             onChangeStatus={handleChangeStatus}
-            showDateInfo="last_updated"
+            showDateInfo="none"
             removingBookId={removingBookId}
           />
         );

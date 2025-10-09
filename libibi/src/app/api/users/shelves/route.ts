@@ -50,12 +50,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ Errore: `Invalid status '${rawStatus}'. Allowed values: ${allowed.join(', ')}` }, { status: 400 });
     }
 
-    // Inserisce automaticamente le date se non fornite dal client: (NON FUNZIONA)
+    // Inserisce automaticamente le date se non fornite dal client:
+    // normalizedStatus è già mappato ai valori del DB: 'WantToRead' | 'Reading' | 'Read' | 'Abandoned'
     const now = new Date();
-    if (normalizedStatus === 'reading' && !started) {
+    if (normalizedStatus === 'Reading' && !started) {
       started = now;
     }
-    if (normalizedStatus === 'finished') {
+    if (normalizedStatus === 'Read') {
       if (!started) started = now;
       if (!finished) finished = now;
     }

@@ -10,6 +10,7 @@ export default function ReviewsList({ bookID, limit = 6 }: ReviewsListProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState<number>(limit);
 
   useEffect(() => {
     async function load() {
@@ -19,7 +20,8 @@ export default function ReviewsList({ bookID, limit = 6 }: ReviewsListProps) {
         const res = await fetch(url);
         if (!res.ok) throw new Error('Errore caricamento recensioni');
         const data = await res.json();
-        setReviews(Array.isArray(data) ? data.slice(0, limit) : []);
+        // keep all reviews client-side, we'll control how many to show via visibleCount
+        setReviews(Array.isArray(data) ? data : []);
       } catch (ex: any) {
         setError(ex?.message ?? String(ex));
       } finally {
@@ -27,6 +29,11 @@ export default function ReviewsList({ bookID, limit = 6 }: ReviewsListProps) {
       }
     }
     load();
+  }, [bookID, limit]);
+
+  // reset visibleCount when bookID or limit changes
+  useEffect(() => {
+    setVisibleCount(limit);
   }, [bookID, limit]);
 
   if (loading) return (
@@ -50,15 +57,44 @@ export default function ReviewsList({ bookID, limit = 6 }: ReviewsListProps) {
   );
 
   return (
-    <div className="space-y-8">
-      {reviews.map(r => (
-        <ReviewDisplay 
-          key={r.reviewID}
-          review={r}
-          showBookTitle={!bookID} // Mostra il titolo del libro solo se non siamo su una pagina specifica
-          showUsername={true} // Mostra sempre l'username nelle liste pubbliche
-        />
-      ))}
-    </div>
+    <section>
+      <header className="mb-6 flex items-center justify-between">
+        <p className="text-lg font-serif text-[var(--color-foreground)]">Leggi le opinioni della community</p>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {reviews.slice(0, visibleCount).map(r => (
+          <ReviewDisplay 
+            key={r.reviewID}
+            review={r}
+            showBookTitle={!bookID} // Mostra il titolo del libro solo se non siamo su una pagina specifica
+            showUsername={true} // Mostra sempre l'username nelle liste pubbliche
+          />
+        ))}
+      </div>
+
+      {/* Controls to load more or collapse */}
+      {reviews.length > visibleCount && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => setVisibleCount((c) => Math.min(reviews.length, c + limit))}
+            className="px-4 py-2 bg-[var(--color-accent)] text-white rounded hover:opacity-90"
+          >
+            Carica altre recensioni
+          </button>
+        </div>
+      )}
+
+      {reviews.length > limit && visibleCount >= reviews.length && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => setVisibleCount(limit)}
+            className="px-3 py-1 text-sm text-gray-600 hover:underline"
+          >
+            Mostra meno
+          </button>
+        </div>
+      )}
+    </section>
   );
 }
