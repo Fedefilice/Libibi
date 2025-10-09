@@ -16,9 +16,9 @@ const BookDetailSection = ({ label, children }: { label: string; children: React
   </div>
 );
 
-export default function BookPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
+export default function BookPage({ params }: { params: Promise<{ id: string }> }) {
   // Unrapped, tramite react 
-  const resolvedParams = React.use(params as Promise<{ id: string }>);
+  const resolvedParams = React.use(params);
   const bookId = decodeURIComponent(resolvedParams.id);
   const { book, loading, error } = useBookDetails(bookId);
 

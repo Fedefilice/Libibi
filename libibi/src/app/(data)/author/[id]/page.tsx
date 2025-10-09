@@ -15,9 +15,9 @@ const AuthorDetailSection = ({ label, children }: { label: string; children: Rea
 );
 
 // Componente per la pagina dell'autore
-export default function AuthorPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
+export default function AuthorPage({ params }: { params: Promise<{ id: string }> }) {
   // Utilizziamo React.use() per "unwrap" il Promise dei parametri come richiesto da Next.js 15.5.4+
-  const resolvedParams = React.use(params as Promise<{ id: string }>);
+  const resolvedParams = React.use(params);
   const authorKey = decodeURIComponent(resolvedParams.id);
   const { author, loading, error } = useAuthorDetails(authorKey);
 

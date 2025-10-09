@@ -1,20 +1,27 @@
 import { requireBasicAuth } from '../../../lib/basicAuth';
 import { connectToDatabase, sql } from '../../../../lib/db';
+import { parseBookTitles } from '../../../../lib/bookUtils';
+import { openLibraryService } from '../../../services/open_library_services';
 
 export async function POST(req) {
   try {
+    console.log('Recommended API called');
+    
     // Richiede Basic Auth 
     const auth = await requireBasicAuth(req);
     if (!auth) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (!auth.user) return Response.json({ error: 'User info missing' }, { status: 500 });
     
     const userID = auth.user.userID;
+    console.log('User ID:', userID);
 
     // Recupera i libri dell'utente dal database
     const userBooks = await getUserBooksFromDatabase(userID);
+    console.log('User books:', JSON.stringify(userBooks, null, 2));
 
     // Prompt
     const readerProfile = buildReaderProfile(userBooks);
+    console.log('Reader profile:', readerProfile);
 
     const systemPrompt = "Sei un bibliotecario esperto specializzato in raccomandazioni personalizzate.\n"
                         "Analizza il profilo di lettura dell'utente e i suoi gusti per suggerire libri perfetti per lui.\n\n"
@@ -23,11 +30,12 @@ export async function POST(req) {
                         "- I generi e autori preferiti\n"
                         "- I libri abbandonati (da evitare generi/stili simili)\n"
                         "- Le preferenze che emergono dalle sue letture\n\n"
-                        "Rispondi esclusivamente con i titoli dei libri in una lista [titolo1; titolo2; ...].";
+                        "Rispondi esclusivamente con un singolo JSON strutturato che contiene tutti e 6 i libri.\n"
+                        "Formato richiesto: {\"raccomandazioni\": [{\"titolo\": \"Nome del libro\", \"autore\": \"Nome dell'autore\"}, {\"titolo\": \"Nome del libro\", \"autore\": \"Nome dell'autore\"}, {\"titolo\": \"Nome del libro\", \"autore\": \"Nome dell'autore\"}, {\"titolo\": \"Nome del libro\", \"autore\": \"Nome dell'autore\"}, {\"titolo\": \"Nome del libro\", \"autore\": \"Nome dell'autore\"}, {\"titolo\": \"Nome del libro\", \"autore\": \"Nome dell'autore\"}]}";
 
     const userPrompt = "Ecco il profilo di lettura dell'utente:\n\n"
                         + readerProfile + "\n\n"
-                        + "Basandoti su questi dati, consiglia 6 libri che potrebbero piacergli.";
+                        + "Basandoti su questi dati, consiglia 6 libri che potrebbero piacergli. Rispondi solo con il JSON richiesto.";
 
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -55,10 +63,52 @@ export async function POST(req) {
     const text = data.choices?.[0]?.message?.content || "Nessuna raccomandazione trovata.";
     
     // Parsa la risposta dell'LLM per estrarre la lista di titoli
-    const match = text.match(/\[([^\]]+)\]/);
-    const recommendedTitles = match ? match[1].split(";").map(title => title.trim()) : [];
+    const recommendedTitles = parseBookTitles(text);
+    console.log('LLM response text:', text);
+    console.log('Parsed titles:', recommendedTitles);
     
-    return Response.json(recommendedTitles);
+    // Cerca ogni libro raccomandato nel database e su OpenLibrary
+    const bookResults = [];
+    
+    for (const title of recommendedTitles) {
+      try {
+        // Cerca direttamente nel database e OpenLibrary
+        const searchResults = await searchBooksInDatabase(title);
+        
+        // Se trovato, prendi il primo risultato
+        if (Array.isArray(searchResults) && searchResults.length > 0) {
+          bookResults.push({
+            ...searchResults[0],
+            isExternal: true
+          });
+        } else {
+          // Se non trovato, crea un oggetto con dati minimi
+          bookResults.push({
+            Title: title,
+            AuthorName: ["Autore da cercare"],
+            CoverUrl: "/book-image.jpg",
+            Rating: null,
+            AuthorKey: [],
+            WorkKey: `search:${encodeURIComponent(title)}`,
+            isExternal: true
+          });
+        }
+      } catch (error) {
+        console.error(`Errore nella ricerca del libro "${title}":`, error);
+        // In caso di errore, crea oggetto con dati minimi
+        bookResults.push({
+          Title: title,
+          AuthorName: ["Errore nella ricerca"],
+          CoverUrl: "/book-image.jpg",
+          Rating: null,
+          AuthorKey: [],
+          WorkKey: `search:${encodeURIComponent(title)}`,
+          isExternal: true
+        });
+      }
+    }
+    
+    return Response.json(bookResults);
 
   } catch (error) {
     console.error('Errore API raccomandazioni:', error);
@@ -133,14 +183,15 @@ async function getUserBooksFromDatabase(userID) {
       SELECT 
         b.title,
         STRING_AGG(a.authorName, ', ') as authors,
-        us.status
+        us.status,
+        MAX(us.last_updated) as last_updated
       FROM User_Shelves us
       INNER JOIN Books b ON us.bookID = b.bookID
       LEFT JOIN Book_Authors ba ON b.bookID = ba.bookID
       LEFT JOIN Authors a ON ba.authorID = a.authorID
       WHERE us.userID = @UserID
       GROUP BY b.title, us.status
-      ORDER BY us.last_updated DESC
+      ORDER BY MAX(us.last_updated) DESC
     `;
     
     const result = await request.query(query);
@@ -193,11 +244,76 @@ async function getUserBooksFromDatabase(userID) {
   }
 }
 
-// Parsing della risposta
-export function parseBookTitles(responseText) {
-    // prende solo come output ciò che è racchiuso tra parentesi quadre
-    const match = responseText.match(/\[([^\]]+)\]/);
-    if (!match) return [];
-    // estrae i titoli separati da punto e virgola e rimuove gli spazi bianchi
-    return match[1].split(";").map(function(title) { return title.trim(); }); 
+// Funzione helper per cercare libri nel database e OpenLibrary
+async function searchBooksInDatabase(query) {
+  try {
+    // Connessione al database
+    const pool = await connectToDatabase();
+    
+    // Cerca prima i libri nel database locale
+    const result = await pool.request()
+      .input('term', sql.NVarChar, `%${query}%`)
+      .query(`
+        SELECT a.authorID, a.authorName, b.bookID, b.title, b.coverImageURL, b.averageRating
+        FROM Books b
+        LEFT JOIN Book_Authors ba ON b.bookID = ba.bookID
+        LEFT JOIN Authors a ON ba.authorID = a.authorID
+        WHERE b.title LIKE @term OR a.authorName LIKE @term OR b.subjectsJson LIKE @term
+      `);
+    
+    // Trasforma i risultati nel formato desiderato
+    const localResults = [];
+    
+    // Raggruppiamo i risultati per bookID per gestire libri con più autori
+    const booksMap = new Map();
+    
+    for (const row of result.recordset) {
+      const bookID = row.bookID;
+      
+      if (!booksMap.has(bookID)) {
+        booksMap.set(bookID, {
+          Title: row.title,
+          AuthorName: row.authorName ? [row.authorName] : [],
+          CoverUrl: row.coverImageURL || null,
+          Rating: row.averageRating || null,
+          AuthorKey: row.authorID ? [row.authorID] : [],
+          WorkKey: bookID
+        });
+      } else {
+        // Aggiungi autori aggiuntivi per lo stesso libro
+        const book = booksMap.get(bookID);
+        if (row.authorName && !book.AuthorName.includes(row.authorName)) {
+          book.AuthorName.push(row.authorName);
+        }
+        if (row.authorID && !book.AuthorKey.includes(row.authorID)) {
+          book.AuthorKey.push(row.authorID);
+        }
+      }
+    }
+    
+    // Converti la mappa in array di risultati
+    for (const book of booksMap.values()) {
+      localResults.push(book);
+    }
+    
+    // Se abbiamo risultati locali, restituiscili
+    if (localResults.length > 0) {
+      return localResults;
+    }
+    
+    // Altrimenti cerca su OpenLibrary
+    const books = await openLibraryService.getListBookAsync(query);
+    return books.map(book => ({
+      Title: book.title,
+      AuthorName: book.author || [],
+      CoverUrl: book.coverUrl,
+      Rating: book.rating,
+      AuthorKey: book.authorKey || [],
+      WorkKey: book.workKey
+    }));
+  } catch (error) {
+    console.error('Errore durante la ricerca:', error);
+    return [];
+  }
 }
+

@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useIsLoggedIn } from '@/hooks/useAuth';
 import { BookShelf } from '@/types';
-import { parseBookTitles } from '@/app/api/recommended/route';
 import BookCard from '@/components/book/BookCard';
 import { BookSearchResult } from '@/types/book';
 
 export default function RecommendationsPage() {
   const { isLoggedIn, isChecking } = useIsLoggedIn();
+  const router = useRouter();
   const [recommendations, setRecommendations] = useState<BookSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,64 +107,8 @@ export default function RecommendationsPage() {
 
       const data = await response.json();
       
-      // Parsa i titoli dalla risposta
-      const bookTitles = parseBookTitles(data.result);
-      
-      // Cerca ogni libro raccomandato su OpenLibrary per ottenere i dettagli completi
-      const bookResults: BookSearchResult[] = [];
-      
-      for (const title of bookTitles) {
-        try {
-          // Cerca il libro tramite l'API di ricerca
-          const searchResponse = await fetch(`/api/search/openLibrary?termineRicerca=${encodeURIComponent(title)}`);
-          
-          if (searchResponse.ok) {
-            const searchData = await searchResponse.json();
-            
-            // Se trovato, prendi il primo risultato
-            if (Array.isArray(searchData) && searchData.length > 0) {
-              bookResults.push({
-                ...searchData[0],
-                isExternal: true
-              });
-            } else {
-              // Se non trovato, crea un oggetto con dati minimi
-              bookResults.push({
-                Title: title,
-                AuthorName: ["Autore da cercare"],
-                CoverUrl: "/book-image.jpg",
-                Rating: null,
-                AuthorKey: [],
-                WorkKey: `search:${encodeURIComponent(title)}`,
-                isExternal: true
-              });
-            }
-          } else {
-            // In caso di errore, crea oggetto con dati minimi
-            bookResults.push({
-              Title: title,
-              AuthorName: ["Errore nella ricerca"],
-              CoverUrl: "/book-image.jpg",
-              Rating: null,
-              AuthorKey: [],
-              WorkKey: `search:${encodeURIComponent(title)}`,
-              isExternal: true
-            });
-          }
-        } catch (error) {
-          console.error(`Errore nella ricerca del libro "${title}":`, error);
-          // In caso di errore, crea oggetto con dati minimi
-          bookResults.push({
-            Title: title,
-            AuthorName: ["Errore nella ricerca"],
-            CoverUrl: "/book-image.jpg",
-            Rating: null,
-            AuthorKey: [],
-            WorkKey: `search:${encodeURIComponent(title)}`,
-            isExternal: true
-          });
-        }
-      }
+      // The API now returns the complete book data directly
+      const bookResults = Array.isArray(data) ? data : [];
       
       setRecommendations(bookResults);
 
@@ -174,11 +119,17 @@ export default function RecommendationsPage() {
     }
   }
 
+  // Redirect to login if not logged in
   useEffect(() => {
+    if (!isChecking && !isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+    
     if (isLoggedIn) {
       getRecommendations();
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isChecking, router]);
 
   // Mostra loading mentre controlla l'autenticazione
   if (isChecking) {
@@ -192,45 +143,9 @@ export default function RecommendationsPage() {
     );
   }
 
+  // If not logged in, the useEffect above will redirect to login
   if (!isLoggedIn) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="card max-w-2xl mx-auto text-center">
-          <div className="mb-6">
-            <div className="text-6xl mb-4">🔒</div>
-            <h1 className="text-3xl font-serif text-[var(--color-foreground)] mb-4">
-              Accesso Richiesto
-            </h1>
-            <p className="text-xl text-gray-600 mb-6">
-              Per accedere alle raccomandazioni personalizzate è necessario effettuare l'accesso. 
-              Le nostre raccomandazioni sono basate sui tuoi libri preferiti e la tua cronologia di lettura.
-            </p>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <a 
-                href="/login" 
-                className="btn btn-accent text-xl py-3 px-8 mr-4"
-              >
-                Accedi
-              </a>
-              <a 
-                href="/register" 
-                className="btn btn-ghost text-xl py-3 px-8"
-              >
-                Registrati
-              </a>
-            </div>
-            
-            <p className="text-sm text-gray-500 mt-4">
-              Hai già un account? <a href="/login" className="text-[var(--color-accent)] hover:underline">Accedi qui</a><br/>
-              Nuovo utente? <a href="/register" className="text-[var(--color-accent)] hover:underline">Crea un account gratuito</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return null; // Don't render anything while redirecting
   }
 
   return (
@@ -238,68 +153,14 @@ export default function RecommendationsPage() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-serif text-[var(--color-foreground)] mb-4">
-            I Tuoi Libri Raccomandati
+            Consigli di lettura per te
           </h1>
-          <p className="text-xl text-gray-600">
-            Raccomandazioni personalizzate basate sui tuoi gusti di lettura
-          </p>
         </div>
-
-        {/* Statistiche libri utente */}
-        {userBooks && (
-          <div className="card mb-8">
-            <h2 className="text-2xl font-serif text-[var(--color-foreground)] mb-4">
-              La Tua Libreria
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--color-accent)] mb-1">
-                  {userBooks.read.length}
-                </div>
-                <div className="text-gray-600">Letti</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--color-accent)] mb-1">
-                  {userBooks.reading.length}
-                </div>
-                <div className="text-gray-600">Leggendo</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--color-accent)] mb-1">
-                  {userBooks.wantToRead.length}
-                </div>
-                <div className="text-gray-600">Voglio Leggere</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--color-accent)] mb-1">
-                  {userBooks.abandoned.length}
-                </div>
-                <div className="text-gray-600">Abbandonati</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Raccomandazioni */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-serif text-[var(--color-foreground)]">
-              Raccomandazioni per Te
-            </h2>
-            <button 
-              onClick={getRecommendations}
-              disabled={loading}
-              className="btn btn-ghost"
-            >
-              {loading ? 'Caricamento...' : 'Aggiorna'}
-            </button>
-          </div>
 
           {loading && (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-accent)] border-t-transparent mb-4"></div>
               <p className="text-gray-600">Sto analizzando i tuoi gusti di lettura e cercando i migliori libri per te...</p>
-              <p className="text-sm text-gray-500 mt-2">Questo potrebbe richiedere qualche momento</p>
             </div>
           )}
 
@@ -351,6 +212,5 @@ export default function RecommendationsPage() {
           )}
         </div>
       </div>
-    </div>
   );
 }

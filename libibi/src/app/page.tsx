@@ -57,10 +57,7 @@ export default function Home() {
       <section className="container mx-auto px-8 pb-12">
         <div className="max-w-6xl mx-auto mt-8">
           <div className="card">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">Recensioni recenti</h2>
-              <a href="/reviews" className="text-sm text-[var(--color-accent)] hover:underline">Vedi tutte</a>
-            </div>
+            <h2 className="text-2xl text-center font-semibold text-[var(--color-foreground)]">Ultime recensioni</h2>
             <div className="flex flex-col gap-4">
               <ReviewsList limit={3} />
             </div>

@@ -12,10 +12,10 @@ export default function LoginPage() {
   const { isLoggedIn, isChecking } = useIsLoggedIn();
   const router = useRouter();
 
-  // Se l'utente è già loggato, reindirizzalo al profilo
+  // Se l'utente è già loggato, reindirizzalo alla home
   useEffect(() => {
     if (!isChecking && isLoggedIn) {
-      router.push("/profile");
+      router.push("/");
     }
   }, [isLoggedIn, isChecking, router]);
 
@@ -45,8 +45,8 @@ export default function LoginPage() {
       } catch (e) {
         console.error("Errore nel salvataggio delle credenziali:", e);
       }
-      // Se la login ha successo, reindirizza al profilo
-      router.push("/profile");
+      // Se la login ha successo, reindirizza alla home
+      router.push("/");
     } catch (err: any) {
       setError(err?.message || "Errore di rete");
     }
