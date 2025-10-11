@@ -75,7 +75,6 @@ export async function POST(req: NextRequest) {
   else request.input('finished', sql.Date, null);
   const updateRes = await request.query(updateSql);
     if (updateRes.rowsAffected && updateRes.rowsAffected[0] > 0) {
-      console.log(`User_Shelves: updated for user=${userID} book=${bookID} status=${normalizedStatus}`);
       return NextResponse.json({ Result: 'Updated' });
     }
 
@@ -91,7 +90,6 @@ export async function POST(req: NextRequest) {
     insertRequest.input('status', sql.NVarChar(20), normalizedStatus);
     try {
       await insertRequest.query(insertSql);
-      console.log(`User_Shelves: inserted for user=${userID} book=${bookID} status=${normalizedStatus}`);
     } catch (err: any) {
       // SQLServer da errore 2627 o 2601 in caso di violazione di vincolo di unicità
       const msg = err?.message ?? String(err);

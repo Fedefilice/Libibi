@@ -133,7 +133,11 @@ const BookShelfItem: React.FC<BookShelfItemProps> = ({
 
           <div className="pt-2">
             <button 
-              onClick={() => onRemoveBook(book.bookID, book.status)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onRemoveBook(book.bookID, book.status);
+              }}
               disabled={removingBookId === book.bookID}
               className="btn btn-ghost w-full text-lg py-3 font-medium"
             >

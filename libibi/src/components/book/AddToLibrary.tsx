@@ -58,7 +58,11 @@ const AddToLibrary: React.FC<AddToLibraryProps> = ({
             </div>
           ) : (
             <button 
-              onClick={onRemoveFromLibrary} 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onRemoveFromLibrary();
+              }} 
               className="btn btn-ghost w-full text-lg py-3 font-medium"
             >
               Rimuovi dalla libreria

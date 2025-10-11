@@ -37,7 +37,7 @@ export default function RootLayout({
         <main className="flex-1 bg-[var(--color-background)]">{children}</main>
         <footer className="px-8 py-6 bg-[var(--color-foreground)] flex justify-center items-center">
           <p className="text-base text-center text-[var(--color-accent)]">
-            © 2023 Libibi. All rights reserved.
+            2025 Libibi ©. All rights reserved.
           </p>
         </footer>
       </body>

@@ -121,7 +121,7 @@ export default function SearchPage() {
         </div>
       ) : searchResults.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center max-w-5xl mx-auto">
+          <div className="flex flex-wrap gap-8 justify-center max-w-6xl mx-auto">
             {searchResults.map((book) => (
               <BookCard key={book.WorkKey} book={book} />
             ))}

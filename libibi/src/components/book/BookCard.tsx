@@ -10,8 +10,8 @@ const BookCard: React.FC<BookCardProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`w-full max-w-[253px] flex ${className}`}>
-      <div className="bg-[var(--color-card)] shadow-md rounded-lg overflow-hidden w-full flex flex-col">
+    <div className={`book-card-container ${className}`}>
+      <div className="bg-[var(--color-card)] shadow-md rounded-lg overflow-hidden w-full h-full flex flex-col">
         <div className="bg-gray-100 w-full">
           <Link href={`/book/${encodeURIComponent(book.WorkKey)}`}>
             <div className="w-full h-[276px] relative flex justify-center items-center">
@@ -32,14 +32,14 @@ const BookCard: React.FC<BookCardProps> = ({
           </Link>
         </div>
 
-        <div className="p-6 bg-[var(--color-card)] flex flex-col flex-1">
+        <div className="p-6 bg-[var(--color-card)] flex flex-col justify-between flex-1">
           <Link href={`/book/${encodeURIComponent(book.WorkKey)}`} className="block text-center">
-            <h3 className="text-xl font-bold text-[var(--color-black)] mb-3 hover:underline line-clamp-2 h-[60px] flex items-center justify-center" title={book.Title}>
+            <h3 className="text-xl font-bold text-[var(--color-black)] mb-3 hover:underline line-clamp-2 leading-tight" title={book.Title}>
               {book.Title}
             </h3>
           </Link>
 
-          <p className="text-base text-[var(--color-accent)] mb-4 line-clamp-1 text-center">
+          <div className="text-base text-[var(--color-accent)] line-clamp-2 text-center leading-tight">
             {book.AuthorName && book.AuthorName.length > 0
               ? book.AuthorName.map((authorName, index) => (
                   <span key={index}>
@@ -54,7 +54,7 @@ const BookCard: React.FC<BookCardProps> = ({
                   </span>
                 ))
               : "Autore sconosciuto"}
-          </p>
+          </div>
         </div>
       </div>
     </div>

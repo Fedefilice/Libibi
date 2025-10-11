@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { clearLoginCookie, useIsLoggedIn } from '@/hooks/useAuth';
 import UserReviewsList from '@/components/reviews/UserReviewsList';
 import BookShelfList from '@/components/book/BookShelfList';
-import { User, MenuTab, BookShelf, ConfirmRemovalState } from '@/types/user';
+import { User, MenuTab, BookShelf } from '@/types/user';
 
 // Pagina del profilo utente
 
@@ -16,7 +16,7 @@ export default function ProfilePage() {
   const [shelvesError, setShelvesError] = useState<string | null>(null);
   const [authValidated, setAuthValidated] = useState(false);
   const [validationAttempted, setValidationAttempted] = useState(false);
-  const [confirmRemoval, setConfirmRemoval] = useState<ConfirmRemovalState | null>(null);
+
   const [removingBookId, setRemovingBookId] = useState<string | null>(null);
   const { isLoggedIn, isChecking } = useIsLoggedIn();
   const router = useRouter();
@@ -265,12 +265,53 @@ export default function ProfilePage() {
     }
   };
 
-  function handleRemoveRequest(bookID: string, currentStatus: string) {
-    // Trova il libro per ottenere il titolo
-    const book = shelves.find(s => s.bookID === bookID);
-    const title = book?.title || bookID;
+  async function handleRemoveRequest(bookID: string, currentStatus: string) {
+    // Rimozione diretta senza alcuna conferma - bypass di qualsiasi popup
+    setRemovingBookId(bookID);
     
-    setConfirmRemoval({ bookID, status: currentStatus, title });
+    try {
+      const auth = getAuthHeader();
+      if (!auth) {
+        setShelvesError('Devi essere loggato');
+        setRemovingBookId(null);
+        return;
+      }
+
+      // Se lo stato corrente è "Reading", sposta in "Abandoned" invece di rimuovere
+      if (currentStatus === 'Reading') {
+        const body = { bookID, status: 'abandoned' };
+        const resPost = await fetch('/api/users/shelves', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json', Authorization: auth }, 
+          body: JSON.stringify(body) 
+        });
+        if (!resPost.ok) {
+          const err = await resPost.json().catch(() => ({}));
+          setShelvesError(err?.Errore || 'Errore aggiornando lo stato del libro');
+          setRemovingBookId(null);
+          return;
+        }
+      } else {
+        const res = await fetch(`/api/users/shelves?bookID=${encodeURIComponent(bookID)}`, { 
+          method: 'DELETE', 
+          headers: { Authorization: auth } 
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          setShelvesError(err?.Errore || 'Errore rimuovendo il libro');
+          setRemovingBookId(null);
+          return;
+        }
+      }
+      
+      // ricarica le liste
+      await fetchShelves();
+    } catch (ex) {
+      console.error('removeFromLibrary', ex);
+      setShelvesError('Errore di rete');
+    } finally {
+      setRemovingBookId(null);
+    }
   }
 
   async function handleChangeStatus(bookID: string, newStatus: string) {
@@ -315,100 +356,10 @@ export default function ProfilePage() {
     }
   }
 
-  async function confirmRemoveFromLibrary() {
-    if (!confirmRemoval) return;
-    
-    const { bookID, status: currentStatus } = confirmRemoval;
-    setRemovingBookId(bookID);
-    
-    try {
-      const auth = getAuthHeader();
-      if (!auth) {
-        setShelvesError('Devi essere loggato');
-        setConfirmRemoval(null);
-        setRemovingBookId(null);
-        return;
-      }
 
-      // Se lo stato corrente è "Reading", sposta in "Abandoned" invece di rimuovere
-      if (currentStatus === 'Reading') {
-        const body = { bookID, status: 'abandoned' };
-        const resPost = await fetch('/api/users/shelves', { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json', Authorization: auth }, 
-          body: JSON.stringify(body) 
-        });
-        if (!resPost.ok) {
-          const err = await resPost.json().catch(() => ({}));
-          setShelvesError(err?.Errore || 'Errore aggiornando lo stato del libro');
-          setConfirmRemoval(null);
-          setRemovingBookId(null);
-          return;
-        }
-      } else {
-        const res = await fetch(`/api/users/shelves?bookID=${encodeURIComponent(bookID)}`, { 
-          method: 'DELETE', 
-          headers: { Authorization: auth } 
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          setShelvesError(err?.Errore || 'Errore rimuovendo il libro');
-          setConfirmRemoval(null);
-          setRemovingBookId(null);
-          return;
-        }
-      }
-      
-      // ricarica e chiudi il modal
-      await fetchShelves();
-      setConfirmRemoval(null);
-    } catch (ex) {
-      console.error('removeFromLibrary', ex);
-      setShelvesError('Errore di rete');
-      setConfirmRemoval(null);
-    } finally {
-      setRemovingBookId(null);
-    }
-  }
 
   return (
     <div className="container mx-auto px-4 py-12">
-      {/* Modal di conferma rimozione */}
-      {confirmRemoval && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Conferma rimozione
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {confirmRemoval.status === 'Reading' 
-                ? `Vuoi spostare "${confirmRemoval.title}" dalla lista "Sto leggendo" alla lista "Abbandonato"?`
-                : `Sei sicuro di voler rimuovere "${confirmRemoval.title}" dalla tua libreria?`
-              }
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setConfirmRemoval(null)}
-                disabled={removingBookId !== null}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Annulla
-              </button>
-              <button
-                onClick={confirmRemoveFromLibrary}
-                disabled={removingBookId !== null}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {removingBookId === confirmRemoval.bookID 
-                  ? 'Elaborazione...' 
-                  : (confirmRemoval.status === 'Reading' ? 'Sposta' : 'Rimuovi')
-                }
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
       <div className="flex flex-col md:flex-row">
         {/* Colonna sinistra - Profilo utente */}
         <div className="w-full md:w-1/4 pr-0 md:pr-6 mb-6 md:mb-0">

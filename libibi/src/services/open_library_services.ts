@@ -82,8 +82,6 @@ export class OpenLibraryService {
 
       const apiUrl = `${OpenLibraryService.SEARCH_API_URL}?${searchParams.toString()}`;
       
-      console.log(`Ricerca API per "${searchQuery}"`);
-      
       // Chiamata API con timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), OpenLibraryService.HTTP_TIMEOUT_SECONDS);

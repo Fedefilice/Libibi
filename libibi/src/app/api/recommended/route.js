@@ -17,7 +17,6 @@ export async function POST(req) {
 
     // Recupera i libri dell'utente dal database
     const userBooks = await getUserBooksFromDatabase(userID);
-    console.log('User books:', JSON.stringify(userBooks, null, 2));
 
     // Prompt
     const readerProfile = buildReaderProfile(userBooks);
@@ -227,7 +226,6 @@ async function getUserBooksFromDatabase(userID) {
           break;
         default:
           // Se non riconosciuto, metti in "want to read" come default
-          console.log('Status non riconosciuto:', book.status);
           categorizedBooks.wantToRead.push(bookData);
       }
     });

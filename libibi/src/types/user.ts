@@ -19,12 +19,6 @@ export type BookShelf = {
   finished_reading_date?: string;
 };
 
-export type ConfirmRemovalState = {
-  bookID: string;
-  status: string;
-  title: string;
-};
-
 // Tipo per record utente nel database (con userID invece di Id e campi obbligatori)
 export type UserRecord = {
   userID: number;

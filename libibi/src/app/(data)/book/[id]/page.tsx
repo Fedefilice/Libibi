@@ -130,6 +130,7 @@ export default function BookPage({ params }: { params: Promise<{ id: string }> }
   }
 
   async function handleRemoveFromLibrary() {
+    // Rimozione diretta senza alcuna conferma - bypass di qualsiasi popup
     try {
       const creds = getStoredCreds();
       if (!creds) {

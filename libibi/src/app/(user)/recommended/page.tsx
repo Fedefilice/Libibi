@@ -173,18 +173,18 @@ export default function RecommendationsPage() {
           )}
 
           {!loading && !error && recommendations.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center max-w-5xl mx-auto">
+            <div className="flex flex-wrap gap-8 justify-center max-w-6xl mx-auto">
               {recommendations.map((book, index) => (
                 <div 
                   key={index}
                   onClick={() => {
                     // Se il libro è stato trovato su OpenLibrary, vai alla pagina del libro
                     if (book.WorkKey && !book.WorkKey.startsWith('search:')) {
-                      window.open(`/book/${encodeURIComponent(book.WorkKey)}`, '_blank');
+                      router.push(`/book/${encodeURIComponent(book.WorkKey)}`);
                     } else {
                       // Altrimenti reindirizza alla ricerca
                       const searchUrl = `/search?q=${encodeURIComponent(book.Title)}`;
-                      window.open(searchUrl, '_blank');
+                      router.push(searchUrl);
                     }
                   }}
                   className="cursor-pointer transform hover:scale-105 transition-transform"
