@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BreadcrumbProps } from '@/types/ui';
 
 export const Navigation = () => (
   <ul className="flex space-x-10">
@@ -45,30 +44,4 @@ export const AuthNavigation = () => (
       Inizia il tuo viaggio
     </button>
   </Link>
-);
-
-// Breadcrumb per navigazione gerarchica
-
-export const Breadcrumb = ({ items }: BreadcrumbProps) => (
-  <nav className="mb-8 text-gray-500">
-    <ol className="flex space-x-2">
-      <li>
-        <Link href="/" className="hover:text-[var(--color-accent)]">
-          Home
-        </Link>
-      </li>
-      {items.map((item, index) => (
-        <li key={index} className="flex space-x-2">
-          <span>/</span>
-          {item.href ? (
-            <Link href={item.href} className="hover:text-[var(--color-accent)]">
-              {item.label}
-            </Link>
-          ) : (
-            <span className="text-[var(--color-foreground)] truncate max-w-xs">{item.label}</span>
-          )}
-        </li>
-      ))}
-    </ol>
-  </nav>
 );

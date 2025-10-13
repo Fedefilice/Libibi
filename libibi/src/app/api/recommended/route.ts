@@ -4,46 +4,13 @@ import { connectToDatabase, sql } from '../../../../lib/db';
 import { parseBookTitles } from '../../../../lib/bookUtils';
 import { openLibraryService } from '../../../services/open_library_services';
 import { BookSearchResult } from '../../../types/book';
-
-// Tipi per le strutture dati locali
-interface UserBook {
-  title: string;
-  author: string;
-  Title?: string;
-  AuthorName?: string[];
-  Author?: string[];
-}
-
-interface CategorizedBooks {
-  read: UserBook[];
-  reading: UserBook[];
-  wantToRead: UserBook[];
-  abandoned: UserBook[];
-}
-
-interface DatabaseBook {
-  title: string;
-  authors: string | null;
-  status: 'Read' | 'Reading' | 'WantToRead' | 'Abandoned';
-  last_updated: Date;
-}
-
-interface DatabaseSearchResult {
-  authorID: number;
-  authorName: string;
-  bookID: string;
-  title: string;
-  coverImageURL: string | null;
-  averageRating: number | null;
-}
-
-interface LLMResponse {
-  choices?: Array<{
-    message?: {
-      content?: string;
-    };
-  }>;
-}
+import { 
+  UserBook, 
+  CategorizedBooks, 
+  DatabaseBook, 
+  DatabaseSearchResult, 
+  LLMResponse 
+} from '../../../types/recommendations';
 
 export async function POST(req: NextRequest): Promise<Response> {
   try {

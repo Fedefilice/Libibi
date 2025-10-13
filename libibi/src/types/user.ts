@@ -9,11 +9,14 @@ export type User = {
 
 export type MenuTab = 'voglio-leggere' | 'sto-leggendo' | 'letto' | 'abbandonato' | 'impostazioni' | 'recensioni';
 
+// Union type per stati libro - unificato per tutto il progetto
+export type BookStatus = 'WantToRead' | 'Reading' | 'Read' | 'Abandoned';
+
 export type BookShelf = {
   bookID: string;
   title?: string;
   coverImageURL?: string;
-  status: 'WantToRead' | 'Reading' | 'Read' | 'Abandoned';
+  status: BookStatus;
   last_updated?: string;
   started_reading_date?: string;
   finished_reading_date?: string;

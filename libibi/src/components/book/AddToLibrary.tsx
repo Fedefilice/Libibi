@@ -1,4 +1,5 @@
 import React from 'react';
+import { BookStatus } from '@/types';
 
 interface AddToLibraryProps {
   status: string;

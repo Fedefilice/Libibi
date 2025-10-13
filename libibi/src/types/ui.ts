@@ -1,4 +1,4 @@
-import { BookShelf } from './user';
+import { BookShelf, BookStatus } from './user';
 
 export type SearchBarProps = {
   searchQuery: string;
@@ -14,8 +14,8 @@ export type BookShelfListProps = {
   loading: boolean;
   error: string | null;
   emptyMessage: string;
-  onRemoveBook: (bookID: string, currentStatus: string) => void;
-  onChangeStatus: (bookID: string, newStatus: string) => void;
+  onRemoveBook: (bookID: string, currentStatus: BookStatus) => void;
+  onChangeStatus: (bookID: string, newStatus: BookStatus) => void;
   showDateInfo?: 'last_updated' | 'started_reading_date' | 'finished_reading_date' | 'none';
   removingBookId?: string | null;
 };

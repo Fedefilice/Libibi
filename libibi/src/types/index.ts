@@ -4,3 +4,4 @@ export * from './book';
 export * from './review';
 export * from './ui';
 export * from './openLibrary';
+export * from './recommendations';

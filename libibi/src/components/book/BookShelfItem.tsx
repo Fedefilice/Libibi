@@ -1,13 +1,13 @@
 "use client";
 
 import React from 'react';
-import { BookShelf } from '@/types';
+import { BookShelf, BookStatus } from '@/types';
 
 interface BookShelfItemProps {
   book: BookShelf;
   showDateInfo?: 'started_reading_date' | 'finished_reading_date' | 'last_updated' | 'none';
-  onRemoveBook: (bookID: string, status: string) => void;
-  onChangeStatus: (bookID: string, newStatus: string) => void;
+  onRemoveBook: (bookID: string, status: BookStatus) => void;
+  onChangeStatus: (bookID: string, newStatus: BookStatus) => void;
   removingBookId?: string | null;
 }
 
@@ -39,7 +39,7 @@ const BookShelfItem: React.FC<BookShelfItemProps> = ({
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: BookStatus) => {
     switch (status) {
       case 'WantToRead': return 'Voglio leggere';
       case 'Reading': return 'Sto leggendo';
@@ -50,7 +50,7 @@ const BookShelfItem: React.FC<BookShelfItemProps> = ({
   };
 
   // Mappa i valori del database ai valori del form (come in AddToLibrary)
-  const statusToFormValue = (status: string) => {
+  const statusToFormValue = (status: BookStatus) => {
     switch (status) {
       case 'WantToRead': return 'want_to_read';
       case 'Reading': return 'reading';
@@ -60,13 +60,13 @@ const BookShelfItem: React.FC<BookShelfItemProps> = ({
     }
   };
 
-  const formValueToStatus = (formValue: string) => {
+  const formValueToStatus = (formValue: string): BookStatus => {
     switch (formValue) {
       case 'want_to_read': return 'WantToRead';
       case 'reading': return 'Reading';
       case 'finished': return 'Read';
       case 'abandoned': return 'Abandoned';
-      default: return formValue;
+      default: return 'WantToRead'; // default sicuro
     }
   };
 

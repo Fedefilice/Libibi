@@ -1,10 +1,14 @@
-export type BookSearchResult = {
+// Tipo base per informazioni libro
+export type BaseBook = {
   Title: string;
   AuthorName: string[];
-  CoverUrl: string | null;
-  Rating: number | null;
   AuthorKey: string[];
   WorkKey: string;
+};
+
+export type BookSearchResult = BaseBook & {
+  CoverUrl: string | null;
+  Rating: number | null;
   isExternal?: boolean;
 };
 
@@ -29,12 +33,15 @@ export type BookDetail = {
   AuthorKey: string[];
 };
 
-export type BookDetailResponse = {
+// Tipi utility comuni
+export type ApiResponse<T> = {
   success?: boolean;
-  result?: BookDetail;
+  result?: T;
   Messaggio?: string;
   errore?: string;
 };
+
+export type BookDetailResponse = ApiResponse<BookDetail>;
 
 // Tipo per dettagli autore
 export type AuthorDetail = {

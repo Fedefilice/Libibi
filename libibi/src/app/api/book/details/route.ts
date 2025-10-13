@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase, sql } from '../../../../../lib/db';
 import { openLibraryService } from '../../../../services/open_library_services';
-import { BookDetail } from '@/types/book';
+import { BookDetail, ApiResponse } from '@/types/book';
 
 /**
  * Endpoint API per ottenere i dettagli di un libro
