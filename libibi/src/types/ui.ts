@@ -1,9 +1,5 @@
 import { BookShelf } from './user';
 
-export type BreadcrumbProps = {
-  items: { label: string; href?: string }[];
-};
-
 export type SearchBarProps = {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
