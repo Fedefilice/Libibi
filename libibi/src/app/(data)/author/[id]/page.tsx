@@ -4,8 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuthorDetails } from '../../../../hooks/useAuthorDetails';
 import Image from 'next/image';
-import { Breadcrumb } from '../../../components/navigation';
-
 // Componente per la sezione dei dettagli dell'autore
 const AuthorDetailSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="mb-6">
@@ -69,12 +67,6 @@ export default function AuthorPage({ params }: { params: Promise<{ id: string }>
   return (
     <div className="container mx-auto px-8 py-12">
       <div className="max-w-6xl mx-auto">
-        {/* Breadcrumb */}
-        <Breadcrumb items={[
-          { label: 'Ricerca', href: '/search' },
-          { label: author.Name || 'Autore' }
-        ]} />
-
         {/* Contenuto principale */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Immagine autore */}

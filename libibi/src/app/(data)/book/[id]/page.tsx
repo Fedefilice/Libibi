@@ -6,8 +6,6 @@ import { useBookDetails } from '../../../../hooks/useBookDetails';
 import BookCard from '../../../../components/book/BookCard';
 import AddToLibrary from '../../../../components/book/AddToLibrary';
 import BookReviewsSection from '../../../../components/book/BookReviewsSection';
-import { Breadcrumb } from '../../../components/navigation';
-
 // Pagina di dettaglio del libro
 const BookDetailSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="mb-6">
@@ -312,11 +310,6 @@ export default function BookPage({ params }: { params: Promise<{ id: string }> }
   return (
     <div className="container mx-auto px-8 py-12">
       <div className="max-w-6xl mx-auto">
-        <Breadcrumb items={[
-          { label: 'Ricerca', href: '/search' },
-          { label: book.Title }
-        ]} />
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div className="md:col-span-1">
               <div className="flex flex-col items-center space-y-6">

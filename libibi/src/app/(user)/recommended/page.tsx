@@ -177,17 +177,7 @@ export default function RecommendationsPage() {
               {recommendations.map((book, index) => (
                 <div 
                   key={index}
-                  onClick={() => {
-                    // Se il libro è stato trovato su OpenLibrary, vai alla pagina del libro
-                    if (book.WorkKey && !book.WorkKey.startsWith('search:')) {
-                      router.push(`/book/${encodeURIComponent(book.WorkKey)}`);
-                    } else {
-                      // Altrimenti reindirizza alla ricerca
-                      const searchUrl = `/search?q=${encodeURIComponent(book.Title)}`;
-                      router.push(searchUrl);
-                    }
-                  }}
-                  className="cursor-pointer transform hover:scale-105 transition-transform"
+                  className="transform hover:scale-105 transition-transform"
                 >
                   <BookCard 
                     book={book}
