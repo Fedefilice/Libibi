@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { requireBasicAuth } from '../../../lib/basicAuth';
+import { requireBasicAuth } from '../../../services/basicAuth';
 import { connectToDatabase, sql } from '../../../../lib/db';
 import { parseBookTitles } from '../../../../lib/bookUtils';
 import { openLibraryService } from '../../../services/open_library_services';

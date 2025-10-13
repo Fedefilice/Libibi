@@ -2,7 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { validateUserAsync, getByUsernameAsync } from '../../../../lib/userService';
+import { validateUserAsync, getByUsernameAsync } from '../../../../services/userService';
 
 export async function POST(req: NextRequest) {
   try {

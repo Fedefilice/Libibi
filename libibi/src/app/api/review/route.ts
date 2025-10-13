@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { requireBasicAuth } from '../../../lib/basicAuth';
+import { requireBasicAuth } from '../../../services/basicAuth';
 import { connectToDatabase, sql } from '../../../../lib/db';
 import { ReviewInput } from '@/types/review';
 

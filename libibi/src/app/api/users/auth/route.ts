@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { requireBasicAuth } from '../../../../lib/basicAuth';
+import { requireBasicAuth } from '../../../../services/basicAuth';
 
 export async function GET(req: NextRequest) {
   const auth = await requireBasicAuth(req);
