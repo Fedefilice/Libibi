@@ -129,11 +129,8 @@ export async function POST(req: NextRequest): Promise<Response> {
 
 // Normalizza un libro e lo formatta per il profilo del lettore
 function normalizeBook(book: UserBook): string {
-  const title: string = book.title || book.Title || "Titolo sconosciuto";
-  const author: string = book.author || 
-                        (book.AuthorName ? book.AuthorName.join(", ") : null) || 
-                        (book.Author ? book.Author.join(", ") : null) || 
-                        "Autore sconosciuto";
+  const title: string = book.Title || "Titolo sconosciuto";
+  const author: string = book.AuthorName ? book.AuthorName.join(", ") : "Autore sconosciuto";
   
   return `- "${title}" di ${author}`;
 }
@@ -215,8 +212,10 @@ async function getUserBooksFromDatabase(userID: number): Promise<CategorizedBook
     
     result.recordset.forEach((book: DatabaseBook) => {
       const bookData: UserBook = {
-        title: book.title,
-        author: book.authors || "Autore sconosciuto"
+        Title: book.title,
+        AuthorName: book.authors ? [book.authors] : ["Autore sconosciuto"],
+        AuthorKey: [],
+        WorkKey: ""
       };
       
       // Mappa gli status del database alle categorie richieste

@@ -1,14 +1,13 @@
-import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BookCardProps } from '@/types/book';
 
-const BookCard: React.FC<BookCardProps> = ({
+const BookCard = ({
   book,
   onAddToLibrary,
   showAddButton = true,
   className = '',
-}) => {
+}: BookCardProps) => {
   return (
     <div className={`book-card-container ${className}`}>
       <div className="bg-[var(--color-card)] shadow-md rounded-lg overflow-hidden w-full h-full flex flex-col">

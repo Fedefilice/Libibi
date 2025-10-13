@@ -1,4 +1,3 @@
-import React from 'react';
 import { BookStatus } from '@/types';
 
 interface AddToLibraryProps {
@@ -13,7 +12,7 @@ interface AddToLibraryProps {
   className?: string;
 }
 
-const AddToLibrary: React.FC<AddToLibraryProps> = ({
+const AddToLibrary = ({
   status,
   onStatusChange,
   bookPresent,
@@ -23,7 +22,7 @@ const AddToLibrary: React.FC<AddToLibraryProps> = ({
   onAddToLibrary,
   onRemoveFromLibrary,
   className = ''
-}) => {
+}: AddToLibraryProps) => {
   return (
     <div className={`w-full max-w-[253px] card ${className}`}>      
       <div className="space-y-4">

@@ -1,6 +1,7 @@
 "use client";
 
-import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { BookShelf, BookStatus } from '@/types';
 
 interface BookShelfItemProps {
@@ -11,13 +12,13 @@ interface BookShelfItemProps {
   removingBookId?: string | null;
 }
 
-const BookShelfItem: React.FC<BookShelfItemProps> = ({
+const BookShelfItem = ({
   book,
   showDateInfo = 'last_updated',
   onRemoveBook,
   onChangeStatus,
   removingBookId
-}) => {
+}: BookShelfItemProps) => {
 
   const getDateDisplay = (book: BookShelf) => {
     switch (showDateInfo) {
@@ -79,25 +80,29 @@ const BookShelfItem: React.FC<BookShelfItemProps> = ({
         <div className="flex items-start gap-6">
           {/* Copertina del libro */}
           <div className="flex-shrink-0">
-            <img 
-              src={book.coverImageURL || '/book-image.jpg'} 
-              alt={book.title || book.bookID} 
-              className="w-20 h-28 object-cover rounded-lg shadow-md"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/book-image.jpg';
-              }}
-            />
+            <div className="w-20 h-28 relative">
+              <Image
+                src={book.coverImageURL || '/book-image.jpg'} 
+                alt={book.title || book.bookID}
+                fill
+                className="object-cover rounded-lg shadow-md"
+                sizes="80px"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/book-image.jpg';
+                }}
+              />
+            </div>
           </div>
           
           {/* Informazioni libro */}
           <div className="flex-1 min-w-0">
-            <a 
+            <Link 
               href={`/book/${encodeURIComponent(book.bookID)}`} 
               className="font-serif text-2xl font-semibold hover:underline text-[var(--color-foreground)] block mb-3 leading-tight"
             >
               {book.title || book.bookID}
-            </a>
+            </Link>
 
             {/* Informazioni data */}
             {showDateInfo !== 'none' && (

@@ -1,12 +1,5 @@
 import { BookShelf, BookStatus } from './user';
 
-export type SearchBarProps = {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  loading: boolean;
-  handleSearch: (e: React.FormEvent) => void;
-};
-
 export type BookShelfListProps = {
   books: BookShelf[];
   status: string;
