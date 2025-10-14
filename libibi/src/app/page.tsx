@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import bookIndex from "../../public/book_index.jpg";
-import { AuthNavigation } from "../components/navigation/Navigation";
+import { AuthNavigation } from "../components/navigation";
 import { useIsLoggedIn } from "../hooks/useAuth";
 import ReviewsList from '../components/reviews/ReviewsList';
 
