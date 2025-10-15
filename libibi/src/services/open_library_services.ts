@@ -134,13 +134,12 @@ export class OpenLibraryService {
     }
   }
 
+
+ // Chiamata API per dettagli libro
   public async getBookAsync(workKey: string): Promise<OpenLibraryBookResult | null> {
     try {
-      // Chiamata API per dettagli libro
       const bookDetailsUrl = OpenLibraryService.BOOK_DETAILS_URL.replace('{0}', workKey);
-      
-      console.log(`Caricamento dettagli libro "${workKey}"`);
-      
+          
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), OpenLibraryService.HTTP_TIMEOUT_SECONDS);
 
@@ -151,7 +150,6 @@ export class OpenLibraryService {
           'Content-Type': 'application/json'
         },
         signal: controller.signal,
-        next: { revalidate: 86400 } // Cache per 24 ore
       });
 
       clearTimeout(timeoutId);
@@ -162,18 +160,58 @@ export class OpenLibraryService {
 
       const bookData = await httpResponse.json();
 
-      const bookDescription = this.extractBookDescription(bookData);
-      const authorKeysList = this.extractAuthorKeysFromBookDetails(bookData);
+      // Estrae la descrizione del libro direttamente qui
+      const extractBookDescription = (data: any): string | undefined => {
+        if (data.description) {
+          if (typeof data.description === 'string') {
+            return data.description;
+          } else if (data.description.value) {
+            return data.description.value;
+          }
+        }
+        return undefined;
+      };
+
+      // Estrae le chiavi degli autori dal dettaglio del libro
+      const extractAuthorKeysFromBookDetails = (data: any): string[] => {
+        if (data.authors && Array.isArray(data.authors)) {
+          return data.authors.map((author: any) => 
+            author.author?.key?.replace("/authors/", "") || ""
+          ).filter((key: string) => key !== "");
+        }
+        return [];
+      };
+
+      // Estrae l'URL della copertina dal dettaglio del libro
+      const extractCoverImageFromBookDetails = (data: any): string | undefined => {
+        if (data.covers && Array.isArray(data.covers) && data.covers.length > 0) {
+          return `https://covers.openlibrary.org/b/id/${data.covers[0]}-M.jpg`;
+        }
+        return undefined;
+      };
+
+      // Estrae la chiave del libro pulita
+      const getCleanWorkKeyFromBookDetails = (data: any): string | undefined => {
+        return data.key?.replace("/works/", "");
+      };
+
+      // Estrae la lista dei soggetti/argomenti
+      const extractSubjectsList = (data: any): string[] => {
+        return data.subjects || [];
+      };
+
+      const bookDescription = extractBookDescription(bookData);
+      const authorKeysList = extractAuthorKeysFromBookDetails(bookData);
       const authorNamesList = await this.getAuthorNamesFromKeys(authorKeysList);
-      const bookCoverUrl = this.extractCoverImageFromBookDetails(bookData);
+      const bookCoverUrl = extractCoverImageFromBookDetails(bookData);
 
       const bookResult = {
-        workKey: this.getCleanWorkKeyFromBookDetails(bookData),
+        workKey: getCleanWorkKeyFromBookDetails(bookData),
         title: this.getStringProperty(bookData, "title"),
         author: authorNamesList,
         authorKey: authorKeysList,
         firstPublishYear: this.getStringProperty(bookData, "first_publish_date"),
-        subject: this.extractSubjectsList(bookData),
+        subject: extractSubjectsList(bookData),
         coverUrl: bookCoverUrl,
         numberOfPagesMedian: this.getIntegerProperty(bookData, "number_of_pages_median"),
         description: bookDescription
@@ -185,6 +223,8 @@ export class OpenLibraryService {
       return null;
     }
   }
+
+
 
   public async getAuthorAsync(authorKey: string): Promise<OpenLibraryAuthorResult | null> {
     try {
@@ -285,41 +325,6 @@ export class OpenLibraryService {
 
   private getCleanWorkKey(document: any): string | undefined {
     return document.key?.replace("/works/", "");
-  }
-
-  private extractBookDescription(data: any): string | undefined {
-    if (data.description) {
-      if (typeof data.description === 'string') {
-        return data.description;
-      } else if (data.description.value) {
-        return data.description.value;
-      }
-    }
-    return undefined;
-  }
-
-  private extractAuthorKeysFromBookDetails(data: any): string[] {
-    if (data.authors && Array.isArray(data.authors)) {
-      return data.authors.map((author: any) => 
-        author.author?.key?.replace("/authors/", "") || ""
-      ).filter((key: string) => key !== "");
-    }
-    return [];
-  }
-
-  private extractCoverImageFromBookDetails(data: any): string | undefined {
-    if (data.covers && Array.isArray(data.covers) && data.covers.length > 0) {
-      return `https://covers.openlibrary.org/b/id/${data.covers[0]}-M.jpg`;
-    }
-    return undefined;
-  }
-
-  private getCleanWorkKeyFromBookDetails(data: any): string | undefined {
-    return data.key?.replace("/works/", "");
-  }
-
-  private extractSubjectsList(data: any): string[] {
-    return data.subjects || [];
   }
 
   private extractAuthorBiography(data: any): string | undefined {

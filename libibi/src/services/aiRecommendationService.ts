@@ -79,9 +79,7 @@ Rispondi esclusivamente con un singolo JSON strutturato che contiene tutti e 6 i
 Formato richiesto: {"raccomandazioni": [{"titolo": "Nome del libro", "autore": "Nome dell'autore"}, {"titolo": "Nome del libro", "autore": "Nome dell'autore"}, {"titolo": "Nome del libro", "autore": "Nome dell'autore"}, {"titolo": "Nome del libro", "autore": "Nome dell'autore"}, {"titolo": "Nome del libro", "autore": "Nome dell'autore"}, {"titolo": "Nome del libro", "autore": "Nome dell'autore"}]}`;
   }
 
-  /**
-   * Costruisce il prompt utente con il profilo di lettura
-   */
+
   private getUserPrompt(readerProfile: string): string {
     return `Ecco il profilo di lettura dell'utente:
 
@@ -90,9 +88,7 @@ ${readerProfile}
 Basandoti su questi dati, consiglia 6 libri che potrebbero piacergli. Rispondi solo con il JSON richiesto.`;
   }
 
-  /**
-   * Costruisce il profilo del lettore basato sui libri categorizzati
-   */
+
   private buildReaderProfile(userBooks: CategorizedBooks): string {
     const profile: string[] = [];
 

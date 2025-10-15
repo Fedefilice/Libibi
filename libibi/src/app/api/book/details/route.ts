@@ -4,6 +4,82 @@ import { openLibraryService } from '../../../../services/open_library_services';
 import { BookDetail, ApiResponse } from '@/types/book';
 
 /**
+ * Trasforma i dati del database in formato di risposta
+ */
+function transformDbToResponse(dbRows: any[]): BookDetail {
+  const firstRow = dbRows[0];
+  
+  const authors: string[] = [];
+  const authorKeys: string[] = [];
+  
+  // Raccoglie tutti gli autori associati al libro
+  for (const row of dbRows) {
+    if (row.authorName && !authors.includes(row.authorName)) {
+      authors.push(row.authorName);
+    }
+    if (row.authorID && !authorKeys.includes(row.authorID)) {
+      authorKeys.push(row.authorID);
+    }
+  }
+  
+  // Deserializza il JSON dei soggetti
+  let subjects: string[] = [];
+  try {
+    if (firstRow.subjectsJson) {
+      subjects = JSON.parse(firstRow.subjectsJson);
+    }
+  } catch (error) {
+    console.error('Errore nel parsing dei soggetti:', error);
+  }
+  
+  return {
+    WorkKey: firstRow.bookID,
+    Title: firstRow.title,
+    FirstPublishYear: firstRow.firstPublicationYear,
+    NumberOfPagesMedian: firstRow.pageNumber,
+    Rating: firstRow.averageRating,
+    Description: firstRow.bookDescription,
+    Subject: subjects,
+    CoverUrl: firstRow.coverImageURL,
+    Author: authors,
+    AuthorKey: authorKeys
+  };
+}
+
+/**
+ * Trasforma i dati di Open Library per l'inserimento nel database
+ */
+function transformOpenLibraryToDb(bookDetail: any) {
+  return {
+    id: bookDetail.workKey,
+    title: bookDetail.title || 'Titolo sconosciuto',
+    firstYear: bookDetail.firstPublishYear,
+    pages: bookDetail.numberOfPagesMedian,
+    description: bookDetail.description,
+    subjects: bookDetail.subject ? JSON.stringify(bookDetail.subject) : null,
+    coverUrl: bookDetail.coverUrl
+  };
+}
+
+/**
+ * Trasforma i dati di Open Library in formato di risposta
+ */
+function transformOpenLibraryToResponse(bookDetail: any): BookDetail {
+  return {
+    WorkKey: bookDetail.workKey || '',
+    Title: bookDetail.title || '',
+    FirstPublishYear: bookDetail.firstPublishYear || null,
+    NumberOfPagesMedian: bookDetail.numberOfPagesMedian || null,
+    Rating: null,
+    Description: bookDetail.description || null,
+    Subject: bookDetail.subject || [],
+    CoverUrl: bookDetail.coverUrl || null,
+    Author: bookDetail.author || [],
+    AuthorKey: bookDetail.authorKey || []
+  };
+}
+
+/**
  * Endpoint API per ottenere i dettagli di un libro
  */
 export async function GET(request: NextRequest) {
@@ -35,65 +111,12 @@ export async function GET(request: NextRequest) {
       `);
     
     if (result.recordset.length > 0) {
-      // Raccogliamo i dati del libro
-      const firstRow = result.recordset[0];
+      const responseData = transformDbToResponse(result.recordset);
       
-      // Estraiamo i dati base del libro
-      const bookData = {
-        WorkKey: firstRow.bookID,
-        Title: firstRow.title,
-        FirstPublishYear: firstRow.firstPublicationYear,
-        NumberOfPagesMedian: firstRow.pageNumber,
-        Rating: firstRow.averageRating,
-        Description: firstRow.bookDescription,
-        SubjectsJson: firstRow.subjectsJson,
-        CoverUrl: firstRow.coverImageURL,
-        Author: [] as string[],
-        AuthorKey: [] as string[],
-        Subject: [] as string[]
-      };
-      
-      // Raccogliamo tutti gli autori associati al libro
-      for (const row of result.recordset) {
-        if (row.authorName && !bookData.Author.includes(row.authorName)) {
-          bookData.Author.push(row.authorName);
-        }
-        if (row.authorID && !bookData.AuthorKey.includes(row.authorID)) {
-          bookData.AuthorKey.push(row.authorID);
-        }
-      }
-      
-      // Proviamo a deserializzare il JSON dei soggetti
-      let subjects: string[] = [];
-      try {
-        if (bookData.SubjectsJson) {
-          subjects = JSON.parse(bookData.SubjectsJson);
-        }
-      } catch (error) {
-        console.error('Errore nel parsing dei soggetti:', error);
-      }
-      
-      // Aggiungiamo i soggetti al risultato
-      bookData.Subject = subjects;
-      
-      // Creiamo un nuovo oggetto omettendo SubjectsJson
-      const responseData: BookDetail = {
-        WorkKey: bookData.WorkKey,
-        Title: bookData.Title,
-        FirstPublishYear: bookData.FirstPublishYear,
-        NumberOfPagesMedian: bookData.NumberOfPagesMedian,
-        Rating: bookData.Rating,
-        Description: bookData.Description,
-        Subject: bookData.Subject,
-        CoverUrl: bookData.CoverUrl,
-        Author: bookData.Author,
-        AuthorKey: bookData.AuthorKey
-      };
-      
-          return NextResponse.json({ 
-      success: true, 
-      result: responseData 
-    });
+      return NextResponse.json({ 
+        success: true, 
+        result: responseData 
+      });
     }
     
     // Se non trovato nel DB, cerca su OpenLibrary
@@ -108,16 +131,7 @@ export async function GET(request: NextRequest) {
     
     // Preparazione dati per inserimento nel DB
     try {
-      // Trasforma i dati del libro in un formato adatto per l'inserimento
-      const bookForDB = {
-        id: bookDetail.workKey,
-        title: bookDetail.title || 'Titolo sconosciuto',
-        firstYear: bookDetail.firstPublishYear,
-        pages: bookDetail.numberOfPagesMedian,
-        description: bookDetail.description,
-        subjects: bookDetail.subject ? JSON.stringify(bookDetail.subject) : null,
-        coverUrl: bookDetail.coverUrl
-      };
+      const bookForDB = transformOpenLibraryToDb(bookDetail);
 
       // Inserisci il libro nel database
       await pool.request()
@@ -154,19 +168,7 @@ export async function GET(request: NextRequest) {
       // Continuiamo comunque per restituire i dati all'utente
     }
     
-    // Trasforma i dati nel formato di risposta desiderato
-    const response: BookDetail = {
-      WorkKey: bookDetail.workKey || '',
-      Title: bookDetail.title || '',
-      FirstPublishYear: bookDetail.firstPublishYear || null,
-      NumberOfPagesMedian: bookDetail.numberOfPagesMedian || null,
-      Rating: null,
-      Description: bookDetail.description || null,
-      Subject: bookDetail.subject || [],
-      CoverUrl: bookDetail.coverUrl || null,
-      Author: bookDetail.author || [],
-      AuthorKey: bookDetail.authorKey || []
-    };
+    const response = transformOpenLibraryToResponse(bookDetail);
     
     return NextResponse.json(response);
   } catch (error) {
